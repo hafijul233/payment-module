@@ -2,6 +2,8 @@
 
 namespace HishabKitab\Payment\Config;
 
-class Nagad
+use HishabKitab\Payment\Abstracts\Config;
+
+class Nagad extends Config
 {
 }

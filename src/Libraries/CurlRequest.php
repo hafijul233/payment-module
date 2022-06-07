@@ -83,63 +83,6 @@ class CurlRequest extends Request implements RequestInterface
     private $shareOptions;
 
     /**
-     * Takes an array of options to set the following possible class properties:
-     *
-     *  - baseURI
-     *  - timeout
-     *  - any other request options to use as defaults.
-     *
-     * @param $config
-     * @param string $uri
-     * @param ResponseInterface $response
-     * @param array $options
-     * @throws RequestException
-     */
-    public function __construct($config, string $uri, ?ResponseInterface $response = null, array $options = [])
-    {
-        if (! function_exists('curl_version')) {
-            throw RequestException::forMissingCurl();
-        }
-
-        $this->response = $response;
-        $this->baseURI = $uri;
-        $this->defaultOptions = $options;
-
-        /** @var ConfigCURLRequest|null $configCURLRequest */
-        $configCURLRequest = config('CURLRequest');
-        $this->shareOptions = $configCURLRequest->shareOptions ?? true;
-
-        $this->config = $this->defaultConfig;
-        $this->parseOptions($options);
-    }
-
-    /**
-     * Sends an HTTP request to the specified $url. If this is a relative
-     * URL, it will be merged with $this->baseURI to form a complete URL.
-     *
-     * @param string $method
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function request($method, string $url, array $options = []): ResponseInterface
-    {
-        $this->parseOptions($options);
-
-        $url = $this->prepareURL($url);
-
-        $method = esc(strip_tags($method));
-
-        $this->send($method, $url);
-
-        if ($this->shareOptions === false) {
-            $this->resetOptions();
-        }
-
-        return $this->response;
-    }
-
-    /**
      * Reset all options to default.
      */
     protected function resetOptions()
@@ -159,92 +102,15 @@ class CurlRequest extends Request implements RequestInterface
     }
 
     /**
-     * Convenience method for sending a GET request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function get(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('get', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a DELETE request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function delete(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('delete', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a HEAD request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function head(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('head', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending an OPTIONS request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function options(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('options', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a PATCH request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function patch(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('patch', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a POST request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function post(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('post', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a PUT request.
-     * @param string $url
-     * @param array $options
-     * @return ResponseInterface
-     */
-    public function put(string $url, array $options = []): ResponseInterface
-    {
-        return $this->request('put', $url, $options);
-    }
-
-    /**
      * Set the HTTP Authentication.
      *
      * @param string $username
      * @param string $password
      * @param string $type basic or digest
      *
-     * @return $this
+     * @return self
      */
-    public function setAuth(string $username, string $password, string $type = 'basic')
+    public function setAuth(string $username, string $password, string $type = 'basic'): self
     {
         $this->config['auth'] = [
             $username,
@@ -524,7 +390,7 @@ class CurlRequest extends Request implements RequestInterface
      * @return array
      * @throws RequestException
      */
-    protected function setCURLOptions(array $curlOptions = [], array $config = [])
+    protected function setCURLOptions(array $curlOptions = [], array $config = []): array
     {
         // Auth Headers
         if (! empty($config['auth'])) {
@@ -695,5 +561,147 @@ class CurlRequest extends Request implements RequestInterface
         curl_close($ch);
 
         return $output;
+    }
+
+    /**
+     * Takes an array of options to set the following possible class properties:
+     *
+     *  - baseURI
+     *  - timeout
+     *  - any other request options to use as defaults.
+     *
+     * @param $config
+     * @param string $uri
+     * @param ResponseInterface|null $response
+     * @param array $options
+     * @throws RequestException
+     */
+    public function __construct($config, string $uri, ?ResponseInterface $response = null, array $options = [])
+    {
+        if (! function_exists('curl_version')) {
+            throw RequestException::forMissingCurl();
+        }
+
+        $this->response = $response;
+        $this->baseURI = $uri;
+        $this->defaultOptions = $options;
+
+        /** @var ConfigCURLRequest|null $configCURLRequest */
+        $configCURLRequest = config('CURLRequest');
+        $this->shareOptions = $configCURLRequest->shareOptions ?? true;
+
+        $this->config = $this->defaultConfig;
+        $this->parseOptions($options);
+    }
+
+    /**
+     * Sends an HTTP request to the specified $url. If this is a relative
+     * URL, it will be merged with $this->baseURI to form a complete URL.
+     *
+     * @param string $method
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function request(string $method, string $url, array $options = []): ResponseInterface
+    {
+        $this->parseOptions($options);
+
+        $url = $this->prepareURL($url);
+
+        $method = esc(strip_tags($method));
+
+        $this->send($method, $url);
+
+        if ($this->shareOptions === false) {
+            $this->resetOptions();
+        }
+
+        return $this->response;
+    }
+
+    /**
+     * Convenience method for sending a GET request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function get(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('get', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending a DELETE request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function delete(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('delete', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending a HEAD request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function head(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('head', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending an OPTIONS request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function options(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('options', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending a PATCH request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function patch(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('patch', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending a POST request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function post(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('post', $url, $options);
+    }
+
+    /**
+     * Convenience method for sending a PUT request.
+     * @param string $url
+     * @param array $options
+     * @return ResponseInterface
+     * @throws RequestException
+     */
+    public function put(string $url, array $options = []): ResponseInterface
+    {
+        return $this->request('put', $url, $options);
     }
 }

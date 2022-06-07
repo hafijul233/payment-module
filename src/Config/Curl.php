@@ -2,6 +2,8 @@
 
 namespace HishabKitab\Payment\Config;
 
-class Curl
+use HishabKitab\Payment\Abstracts\Config;
+
+class Curl extends Config
 {
 }

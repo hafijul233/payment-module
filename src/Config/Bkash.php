@@ -2,6 +2,8 @@
 
 namespace HishabKitab\Payment\Config;
 
-class Bkash
+use HishabKitab\Payment\Abstracts\Config;
+
+class Bkash extends Config
 {
 }
