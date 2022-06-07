@@ -2,8 +2,6 @@
 
 namespace HishabKitab\Payment\Interfaces;
 
-use HishabKitab\Payment\Exceptions\RequestException;
-
 interface RequestInterface
 {
     /**
