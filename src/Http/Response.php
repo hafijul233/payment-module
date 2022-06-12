@@ -66,7 +66,7 @@ class Response
     public function populateHeaders(): void
     {
         $contentType = $_SERVER['CONTENT_TYPE'] ?? getenv('CONTENT_TYPE');
-        if (!empty($contentType)) {
+        if (! empty($contentType)) {
             $this->setHeader('Content-Type', $contentType);
         }
         unset($contentType);
@@ -129,7 +129,7 @@ class Response
         $origName = $this->getHeaderName($name);
 
         if (isset($this->headers[$origName]) && is_array($this->headers[$origName]->getValue())) {
-            if (!is_array($value)) {
+            if (! is_array($value)) {
                 $value = [$value];
             }
 
@@ -207,7 +207,7 @@ class Response
      */
     public function setProtocolVersion(string $version): self
     {
-        if (!is_numeric($version)) {
+        if (! is_numeric($version)) {
             $version = substr($version, strpos($version, '/') + 1);
         }
 
@@ -257,13 +257,13 @@ class Response
         }
 
         // Unknown and no message?
-        if (!array_key_exists($code, static::$statusCodes) && empty($reason)) {
+        if (! array_key_exists($code, static::$statusCodes) && empty($reason)) {
             throw HttpException::forUnkownStatusCode($code);
         }
 
         $this->statusCode = $code;
 
-        $this->reason = !empty($reason) ? $reason : static::$statusCodes[$code];
+        $this->reason = ! empty($reason) ? $reason : static::$statusCodes[$code];
 
         return $this;
     }
@@ -330,7 +330,7 @@ class Response
     public function setContentType(string $mime, string $charset = 'UTF-8'): self
     {
         // add charset attribute if not already there and provided as parm
-        if ((strpos($mime, 'charset=') < 1) && !empty($charset)) {
+        if ((strpos($mime, 'charset=') < 1) && ! empty($charset)) {
             $mime .= '; charset=' . $charset;
         }
 
@@ -422,7 +422,7 @@ class Response
         $this->setContentType($mime);
 
         // Nothing much to do for a string...
-        if (!is_string($body) || $format === 'json-unencoded') {
+        if (! is_string($body) || $format === 'json-unencoded') {
             $body = Services::format()->getFormatter($mime)->format($body);
         }
 
@@ -568,7 +568,7 @@ class Response
 
         // Per spec, MUST be sent with each request, if possible.
         // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
-        if (!isset($this->headers['Date']) && PHP_SAPI !== 'cli-server') {
+        if (! isset($this->headers['Date']) && PHP_SAPI !== 'cli-server') {
             $this->setDate(DateTime::createFromFormat('U', (string)time()));
         }
 
@@ -668,8 +668,7 @@ class Response
         $secure = false,
         $httponly = false,
         $samesite = null
-    )
-    {
+    ) {
         if ($name instanceof Cookie) {
             $this->cookieStore = $this->cookieStore->put($name);
 
@@ -782,7 +781,7 @@ class Response
             }
         }
 
-        if (!$found) {
+        if (! $found) {
             $this->setCookie($name, '', '', $domain, $path, $prefix);
         }
 
@@ -817,7 +816,7 @@ class Response
         $request = Services::request();
 
         foreach ($this->cookieStore->display() as $cookie) {
-            if ($cookie->isSecure() && !$request->isSecure()) {
+            if ($cookie->isSecure() && ! $request->isSecure()) {
                 throw SecurityException::forDisallowedAction();
             }
 
@@ -1085,7 +1084,7 @@ class Response
     {
         $origName = $this->getHeaderName($name);
 
-        if (!array_key_exists($origName, $this->headers)) {
+        if (! array_key_exists($origName, $this->headers)) {
             return '';
         }
 
@@ -1176,7 +1175,7 @@ class Response
     public function getReasonPhrase()
     {
         if ($this->reason === '') {
-            return !empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
+            return ! empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
         }
 
         return $this->reason;

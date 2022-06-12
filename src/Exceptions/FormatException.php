@@ -1,8 +1,6 @@
 <?php
 
-
 namespace HishabKitab\Payment\Exceptions;
-
 
 class FormatException
 {
