@@ -15,7 +15,13 @@
         }
     ],
     "require": {
-        "php": "^7.3",
+        "php": "^7.3|^8.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "ext-simplexml": "*",
+        "guzzlehttp/guzzle": "^7.0",
+        "kint-php/kint": "^4.1",
+        "kint-php/kint-helpers": "^4.0",
         "laminas/laminas-escaper": "^2.10"
     },
     "require-dev": {
@@ -43,6 +49,7 @@
     },
     "config": {
         "sort-packages": true,
+        "optimize-autoloader": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true
         }

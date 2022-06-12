@@ -3,25 +3,29 @@
 namespace HishabKitab\Payment\Vendors;
 
 use HishabKitab\Payment\Abstracts\Vendor;
+use HishabKitab\Payment\Driver\CurlRequest;
 use HishabKitab\Payment\Interfaces\VendorInterface;
-use HishabKitab\Payment\Libraries\CurlRequest;
 
-class Bkash extends Vendor implements VendorInterface
+class Test extends Vendor implements VendorInterface
 {
     /**
-     * @var CurlRequest
-     * @throw HttpException
+     * @throws \Exception
      */
-    protected $curlRequest;
-
-    public function __construct()
+    public function __construct(array $options = [])
     {
-        $this->curlRequest = new CurlRequest([], '');
+        $this->setConfig(config('test'));
+        $this->setMode(($this->config['mode'] ?? 'sandbox'));
+        $this->setBaseURI($this->config[$this->getMode()]['endpoint']);
+        $this->setClient('curl');
     }
 
     public function findMany(array $filters = []): array
     {
-        // TODO: Implement findMany() method.
+        /**
+         * @var CurlRequest $client
+         */
+        $client = $this->getClient();
+        dd($client->get('/api/test'));
     }
 
     public function findOne(array $transactionInfo)

@@ -4,7 +4,7 @@
 namespace HishabKitab\Payment\Abstracts;
 
 
-abstract class Config
+abstract class BaseConfig
 {
     public $mode = 'sandbox'; // live
 

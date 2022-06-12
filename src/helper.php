@@ -8,6 +8,7 @@ if (! function_exists('lang')) {
         //noting
     }
 }
+
 if (! function_exists('esc')) {
     /**
      * Performs simple auto-escaping of data for security reasons.
@@ -62,5 +63,40 @@ if (! function_exists('esc')) {
         }
 
         return $data;
+    }
+}
+
+if (! function_exists('config')) {
+    /**
+     * More simple way of getting config instances from Factories
+     *
+     * @return mixed
+     */
+    function config(string $location, $default = null)
+    {
+        $value = $default;
+        $notations = explode(".", $location);
+        $configFilePath = dirname(__DIR__) . "/config/{$notations[0]}.php";
+        if (file_exists($configFilePath)) {
+            $config = include $configFilePath;
+            array_shift($notations);
+            if (count($notations) > 0) {
+                $temp = $config;
+                foreach ($notations as $notation) {
+                    if (isset($temp[$notation])) {
+                        $temp = $temp[$notation];
+                    } else {
+                        $temp = null;
+                    }
+                }
+                $value = $temp;
+            } else {
+                $value = $config;
+            }
+        } else {
+            echo "File Does not Exist";
+        }
+
+        return $value;
     }
 }

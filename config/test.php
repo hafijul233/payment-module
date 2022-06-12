@@ -1,31 +1,34 @@
 <?php
 
 /**
- * Agrani Api Configuration
+ * Test Api Configuration
  */
 return [
-    'mode' => 'sandbox', //sandbox , live
+    'mode' => 'live', //sandbox , live
+
     'live' => [
-        'endpoint' => 'https://fex.agranibank.org/remapiuat',
+        'endpoint' => 'http://api.hafijulislam.me/api',
         'username' => '7106UAT',
         'password' => '7106@Pass',
         'excode' => '7106',
     ],
 
     'sandbox' => [
-        'endpoint' => 'https://fex.agranibank.org/remapiuat',
+        'endpoint' => 'http://api.hafijulislam.me/api',
         'username' => '7106UAT',
         'password' => '7106@Pass',
         'excode' => '7106'
     ],
-    'signature' => [
+
+/*    'signature' => [
         'certificate' => storage_path('agrani/Certificate.crt'),
         'target_pfx' => storage_path('agrani/Certificate.pfx'),
         'private_key' => storage_path('agrani/Private-Key.key'),
         'passphase' => 'mycash',
         'alias' => null,
         'filepath' => ''
-    ],
+    ],*/
+
     'country_code' => [
         "AFG" => ["name" => "Afghanistan", "agrani_code" => "AF"],
         "ALB" => ["name" => "Albania", "agrani_code" => "AL"],
