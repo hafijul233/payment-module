@@ -23,104 +23,53 @@ abstract class Request
     public const POST = 'post';
 
     public const PUT = 'put';
-
+    /**
+     * @var array
+     */
+    public $options = [];
     /**
      * The response object associated with this request
      *
      * @var ResponseInterface|null
      */
     protected $response = '';
-
-    /**
-     * The base URL associated with this request
-     *
-     * @var string
-     */
-    private $baseUrl = '';
-
-    /**
-     * @var string
-     */
-    private $url;
-
     /**
      * The setting values
      *
      * @var array
      */
     protected $config = [];
-
-    /**
-     * @var array
-     */
-    private $data = [];
-
     /**
      *
      */
     protected $file = null;
-
+    /**
+     * The base URL associated with this request
+     *
+     * @var string
+     */
+    private $baseUrl = '';
+    /**
+     * @var string
+     */
+    private $url;
+    /**
+     * @var array
+     */
+    private $data = [];
     /**
      * @var array
      */
     private $headers = [];
-
     /**
      * @var string
      */
     private $method;
 
-    /**
-     * @var array
-     */
-    public $options = [];
-
     /******************************************************************
      * Getter Setter Methods
      ******************************************************************
      */
-
-    /**
-     * @param string $baseUrl
-     */
-    public function setBaseUrl(string $baseUrl): void
-    {
-        $this->baseUrl = $baseUrl;
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl(): string
-    {
-        return $this->baseUrl;
-    }
-
-    /**
-     * @param string $url
-     */
-    public function setUrl(string $url): void
-    {
-        $this->url = $url;
-    }
-
-    /**
-     * @return string
-     */
-    public function getUrl(): string
-    {
-        return $this->url;
-    }
-
-    /**
-     * @param string $name
-     * @param mixed $value
-     * @return void
-     */
-    public function setHeader(string $name, $value = null): void
-    {
-        $this->headers[] = new Header($name, $value);
-    }
 
     /**
      * Get a Header Object array
@@ -130,39 +79,6 @@ abstract class Request
     public function getHeader(): array
     {
         return $this->headers;
-    }
-
-    /**
-     * @param bool $upper
-     * @return string
-     */
-    public function getMethod(bool $upper = false): string
-    {
-        return ($upper === true) ? strtoupper($this->method) : $this->method;
-    }
-
-    /**
-     * @param string $method
-     */
-    public function setMethod(string $method): void
-    {
-        $this->method($method);
-    }
-
-    /**
-     * @return array
-     */
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    /**
-     * @param array $data
-     */
-    public function setData(array $data): void
-    {
-        $this->data = $data;
     }
 
     /**
@@ -180,74 +96,59 @@ abstract class Request
 
         $fillUrl = $this->getBaseUrl() . $this->getUrl();
         if ($this->getMethod() === self::GET) {
-            $fillUrl .= ('?' .http_build_query($this->getData()));
+            $fillUrl .= ('?' . http_build_query($this->getData()));
         }
 
         return $fillUrl;
     }
 
     /**
-     * @param array $options
+     * @return string
      */
-    public function setOptions(array $options): void
+    public function getBaseUrl(): string
     {
-        $this->options = $options;
+        return $this->baseUrl;
     }
 
     /**
-     * @return array
+     * @param string $baseUrl
      */
-    public function getOptions(): array
+    public function setBaseUrl(string $baseUrl): void
     {
-        return $this->options;
-    }
-
-    /******************************************************************
-     * Chained / Fluent  Methods
-     ******************************************************************
-     */
-
-    /**
-     * @param array $data
-     * @return CurlRequest
-     */
-    public function data(array $data = [])
-    {
-        $this->data = $data;
-
-        return $this;
+        $this->baseUrl = $baseUrl;
     }
 
     /**
-     * set file to bd embedded with request
-     *
-     * @param null $file
-     * @return $this
+     * @return string
      */
-    public function file($file = null)
+    public function getUrl(): string
     {
-        $this->file = $file;
-
-        return $this;
+        return $this->url;
     }
 
     /**
-     * set the url to send api request
-     *
-     * @param string $url url start with '/' suffix
-     * @param bool $append force current url as full url
-     * @return $this
+     * @param string $url
      */
-    public function url(string $url = '', bool $append = true)
+    public function setUrl(string $url): void
     {
-        if ($append === true) {
-            $this->setUrl($url);
-        } else {
-            $this->setBaseUrl($url);
-            $this->setUrl('');
-        }
+        $this->url = $url;
+    }
 
-        return $this;
+    /**
+     * @param bool $upper
+     * @return string
+     */
+    public function getMethod(bool $upper = false): string
+    {
+        return ($upper === true) ? strtoupper($this->method) : $this->method;
+    }
+
+    /**
+     * @param string $method
+     */
+    public function setMethod(string $method): void
+    {
+        $this->method($method);
     }
 
     /**
@@ -317,11 +218,101 @@ abstract class Request
         return $this;
     }
 
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data): void
+    {
+        $this->data = $data;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions(array $options): void
+    {
+        $this->options = $options;
+    }
+
+    /******************************************************************
+     * Chained / Fluent  Methods
+     ******************************************************************
+     */
+
+    /**
+     * @param array $data
+     * @return CurlRequest
+     */
+    public function data(array $data = [])
+    {
+        $this->data = $data;
+
+        return $this;
+    }
+
+    /**
+     * set file to bd embedded with request
+     *
+     * @param null $file
+     * @return $this
+     */
+    public function file($file = null)
+    {
+        $this->file = $file;
+
+        return $this;
+    }
+
+    /**
+     * set the url to send api request
+     *
+     * @param string $url url start with '/' suffix
+     * @param bool $append force current url as full url
+     * @return $this
+     */
+    public function url(string $url = '', bool $append = true)
+    {
+        if ($append === true) {
+            $this->setUrl($url);
+        } else {
+            $this->setBaseUrl($url);
+            $this->setUrl('');
+        }
+
+        return $this;
+    }
+
     public function header(string $name, $value)
     {
         $this->setHeader($name, $value);
 
         return $this;
+    }
+
+    /**
+     * @param string $name
+     * @param mixed $value
+     * @return void
+     */
+    public function setHeader(string $name, $value = null): void
+    {
+        $this->headers[] = new Header($name, $value);
     }
 
     /**

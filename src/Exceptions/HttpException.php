@@ -2,7 +2,9 @@
 
 namespace HishabKitab\Payment\Exceptions;
 
-class HttpException extends \Exception
+use Exception;
+
+class HttpException extends Exception
 {
     /**
      * @return static

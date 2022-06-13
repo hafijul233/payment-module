@@ -3,7 +3,6 @@
 namespace HishabKitab\Payment\Formatter;
 
 use HishabKitab\Payment\Config\Format as FormatterConfig;
-use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Interfaces\FormatInterface;
 use SimpleXMLElement;
 
@@ -36,7 +35,7 @@ class Xml implements FormatInterface
         $options = $config->formatterOptions['application/xml'] ?? 0;
         $output = new SimpleXMLElement('<?xml version="1.0"?><response></response>', $options);
 
-        $this->arrayToXML((array) $data, $output);
+        $this->arrayToXML((array)$data, $output);
 
         return $output->asXML();
     }

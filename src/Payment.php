@@ -2,6 +2,7 @@
 
 namespace HishabKitab\Payment;
 
+use Exception;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 
 class Payment
@@ -17,6 +18,17 @@ class Payment
     private $vendor;
 
     /**
+     * Payment constructor.
+     * @throws Exception
+     */
+    public function __construct()
+    {
+        $this->setConfig(config('payment'));
+        $this->setVendor('test', $options = []);
+        dd($this->getVendor()->findMany());
+    }
+
+    /**
      * @return VendorInterface|null
      */
     public function getVendor()
@@ -27,13 +39,13 @@ class Payment
     /**
      * @param string $vendor
      * @param $options
-     * @throws \Exception
+     * @throws Exception
      */
     public function setVendor(string $vendor, $options): void
     {
         $className = config("payment.vendors.{$vendor}");
         if ($className == null) {
-            throw new \Exception("Transaction Vendor not found.");
+            throw new Exception("Transaction Vendor not found.");
         }
 
         $this->vendor = new $className($options);
@@ -53,16 +65,5 @@ class Payment
     public function setConfig(array $config): void
     {
         $this->config = $config;
-    }
-
-    /**
-     * Payment constructor.
-     * @throws \Exception
-     */
-    public function __construct()
-    {
-        $this->setConfig(config('payment'));
-        $this->setVendor('test', $options = []);
-        dd($this->getVendor()->findMany());
     }
 }

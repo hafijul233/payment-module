@@ -1,4 +1,5 @@
 <?php
+
 return [
     'driver' => 'curl',
     'drivers' => [
@@ -6,6 +7,6 @@ return [
     ],
     'vendor' => 'test',
     'vendors' => [
-        'test' => \HishabKitab\Payment\Vendors\Test::class
+        'test' => \HishabKitab\Payment\Vendors\Test::class,
     ],
 ];

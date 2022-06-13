@@ -40,7 +40,6 @@ class Key
     public function __construct($config)
     {
         if (is_object($config)) {
-
             $data['NAGAD_APP_ENV'] = $config->appEnv;
             $data['NAGAD_APP_ACCOUNT'] = $config->appAccount;
             $data['NAGAD_APP_MERCHANTID'] = $config->appMerchantID;
@@ -48,9 +47,7 @@ class Key
             $data['NAGAD_APP_MERCHANT_PG_PUBLIC_KEY'] = $config->pgPublicKey;
             $data['NAGAD_APP_TIMEZONE'] = $config->timeZone;
             $envData = self::generateEnv($data);
-
         } else {
-
             $envData = self::generateEnv($config);
         }
 
@@ -59,10 +56,9 @@ class Key
         $this->appMerchantID = $envData['NAGAD_APP_MERCHANTID'];
         $this->merchantPrivateKey = $envData['NAGAD_APP_MERCHANT_PRIVATE_KEY'];
         $this->pgPublicKey = $envData['NAGAD_APP_MERCHANT_PG_PUBLIC_KEY'];
-        if (array_key_exists('NAGAD_APP_TIMEZONE', $envData))
-
+        if (array_key_exists('NAGAD_APP_TIMEZONE', $envData)) {
             $this->timeZone = $envData['NAGAD_APP_TIMEZONE'];
-
+        }
     }
 
     /**
@@ -201,5 +197,4 @@ class Key
     {
         $this->timeZone = $timeZone;
     }
-
 }

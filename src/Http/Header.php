@@ -39,17 +39,6 @@ class Header
     }
 
     /**
-     * Gets the raw value of the header. This may return either a string
-     * of an array, depending on whether the header has multiple values or not.
-     *
-     * @return array|string
-     */
-    public function getValue()
-    {
-        return $this->value;
-    }
-
-    /**
      * Sets the name of the header, overwriting any previous value.
      *
      * @return $this
@@ -59,6 +48,17 @@ class Header
         $this->name = $name;
 
         return $this;
+    }
+
+    /**
+     * Gets the raw value of the header. This may return either a string
+     * of an array, depending on whether the header has multiple values or not.
+     *
+     * @return array|string
+     */
+    public function getValue()
+    {
+        return $this->value;
     }
 
     /**
@@ -124,6 +124,15 @@ class Header
     }
 
     /**
+     * Returns a representation of the entire header string, including
+     * the header name and all values converted to the proper format.
+     */
+    public function __toString(): string
+    {
+        return $this->name . ': ' . $this->getValueLine();
+    }
+
+    /**
      * Retrieves a comma-separated string of the values for a single header.
      *
      * NOTE: Not all header values may be appropriately represented using
@@ -155,14 +164,5 @@ class Header
         }
 
         return implode(', ', $options);
-    }
-
-    /**
-     * Returns a representation of the entire header string, including
-     * the header name and all values converted to the proper format.
-     */
-    public function __toString(): string
-    {
-        return $this->name . ': ' . $this->getValueLine();
     }
 }

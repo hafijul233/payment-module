@@ -1,12 +1,6 @@
 <?php
 
-namespace HishabKitab\Payment\Config;
-
-use HishabKitab\Payment\Formatter\Format;
-use HishabKitab\Payment\Interfaces\FormatInterface;
-
-class FormatConfig
-{
+return [
     /**
      * --------------------------------------------------------------------------
      * Available Response Formats
@@ -22,11 +16,12 @@ class FormatConfig
      *
      * @var string[]
      */
-    public $supportedResponseFormats = [
+    'available' => [
         'application/json',
         'application/xml', // machine-readable XML
         'text/xml', // human-readable XML
-    ];
+        'text/html',
+    ],
 
     /**
      * --------------------------------------------------------------------------
@@ -39,11 +34,12 @@ class FormatConfig
      *
      * @var array<string, string>
      */
-    public $formatters = [
-        'application/json' => JSONFormatter::class,
-        'application/xml' => XMLFormatter::class,
-        'text/xml' => XMLFormatter::class,
-    ];
+    'formatters' => [
+        'application/json' => \HishabKitab\Payment\Formatter\Json::class,
+        'application/xml' => \HishabKitab\Payment\Formatter\Xml::class,
+        'text/xml' => \HishabKitab\Payment\Formatter\Xml::class,
+        'text/html' => \HishabKitab\Payment\Formatter\Html::class,
+    ],
 
     /**
      * --------------------------------------------------------------------------
@@ -55,9 +51,9 @@ class FormatConfig
      *
      * @var array<string, int>
      */
-    public $formatterOptions = [
+    'options' => [
         'application/json' => JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES,
         'application/xml' => 0,
         'text/xml' => 0,
-    ];
-}
+    ],
+];

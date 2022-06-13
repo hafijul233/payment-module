@@ -2,6 +2,7 @@
 
 namespace HishabKitab\Payment\Vendors;
 
+use Exception;
 use HishabKitab\Payment\Abstracts\Vendor;
 use HishabKitab\Payment\Driver\CurlRequest;
 use HishabKitab\Payment\Interfaces\VendorInterface;
@@ -9,7 +10,7 @@ use HishabKitab\Payment\Interfaces\VendorInterface;
 class Test extends Vendor implements VendorInterface
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function __construct(array $options = [])
     {

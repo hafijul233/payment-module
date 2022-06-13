@@ -5,15 +5,13 @@ namespace HishabKitab\Payment\Abstracts;
 abstract class Vendor
 {
     /**
-     * @var array
-     */
-    protected $config;
-
-    /**
      * @var string
      */
     public $baseUrl;
-
+    /**
+     * @var array
+     */
+    protected $config;
     /**
      * @var array
      */
@@ -32,44 +30,6 @@ abstract class Vendor
     /**
      * @return array
      */
-    public function getConfig(): array
-    {
-        return $this->config;
-    }
-
-    /**
-     * @param array $config
-     */
-    public function setConfig(array $config = []): void
-    {
-        if (!empty($config)) {
-            $this->config = $config;
-        } else {
-            $this->config = config('test');
-        }
-    }
-
-    /**
-     * @return string
-     */
-    public function getBaseUrl(): string
-    {
-        return $this->baseUrl;
-    }
-
-    /**
-     * @param string $baseUrl
-     */
-    public function setBaseUrl(string $baseUrl = ''): void
-    {
-        $this->baseUrl = (!empty($baseUrl))
-            ? $baseUrl
-            : $this->config[$this->getMode()]['endpoint'];
-    }
-
-    /**
-     * @return array
-     */
     public function getOptions(): array
     {
         return $this->options;
@@ -81,24 +41,6 @@ abstract class Vendor
     public function setOptions(array $options): void
     {
         $this->options = $options;
-    }
-
-    /**
-     * @param string $mode
-     */
-    public function setMode(string $mode = ''): void
-    {
-        $this->mode = (!empty($mode))
-            ? $mode
-            : $this->config['mode'] ?? 'sandbox';
-    }
-
-    /**
-     * @return string
-     */
-    public function getMode(): string
-    {
-        return $this->mode;
     }
 
     /**
@@ -129,5 +71,61 @@ abstract class Vendor
             $this->getBaseUrl(),
             $this->getConfig()
         );
+    }
+
+    /**
+     * @return string
+     */
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    /**
+     * @param string $baseUrl
+     */
+    public function setBaseUrl(string $baseUrl = ''): void
+    {
+        $this->baseUrl = (! empty($baseUrl))
+            ? $baseUrl
+            : $this->config[$this->getMode()]['endpoint'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getMode(): string
+    {
+        return $this->mode;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConfig(): array
+    {
+        return $this->config;
+    }
+
+    /**
+     * @param array $config
+     */
+    public function setConfig(array $config = []): void
+    {
+        if (! empty($config)) {
+            $this->config = $config;
+        } else {
+            $this->config = config('test');
+        }
+    }
+
+    /**
+     * @param string $mode
+     */
+    public function setMode(string $mode = ''): void
+    {
+        $this->mode = (! empty($mode))
+            ? $mode
+            : $this->config['mode'] ?? 'sandbox';
     }
 }

@@ -34,7 +34,7 @@ class Html implements FormatInterface
         $options = $config->formatterOptions['application/xml'] ?? 0;
         $output = new SimpleHTMLElement('<?xml version="1.0"?><response></response>', $options);
 
-        $this->arrayToHTML((array) $data, $output);
+        $this->arrayToHTML((array)$data, $output);
 
         return $output->asHTML();
     }
