@@ -16,6 +16,7 @@ class Json implements FormatInterface
      * @param mixed $data
      *
      * @return bool|string (JSON string | false)
+     * @throws FormatException
      */
     public function format($data)
     {
