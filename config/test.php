@@ -19,4 +19,9 @@ return [
         'password' => '7106@Pass',
         'excode' => '7106'
     ],
+
+    'header' => [
+        'accept_type' => 'application/json', //[application/json, application/xml, text/html, text/plain, */*]
+        'content_type' => '*/*', //[application/json, application/xml, text/html, text/plain, */*]
+    ],
 ];

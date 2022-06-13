@@ -1,6 +1,6 @@
 <?php
 return [
-    'driver' => 'guzzle',
+    'driver' => 'curl',
     'drivers' => [
         'curl' => \HishabKitab\Payment\Driver\CurlRequest::class,
     ],

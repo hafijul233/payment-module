@@ -36,12 +36,12 @@ abstract class Request
      *
      * @var string
      */
-    protected $baseUrl = '';
+    private $baseUrl = '';
 
     /**
      * @var string
      */
-    protected $url;
+    private $url;
 
     /**
      * The setting values
@@ -53,7 +53,7 @@ abstract class Request
     /**
      * @var array
      */
-    protected $data = [];
+    private $data = [];
 
     /**
      *
@@ -63,12 +63,22 @@ abstract class Request
     /**
      * @var array
      */
-    protected $headers = [];
+    private $headers = [];
 
     /**
      * @var string
      */
-    protected $method;
+    private $method;
+
+    /**
+     * @var array
+     */
+    public $options = [];
+
+    /******************************************************************
+     * Getter Setter Methods
+     ******************************************************************
+     */
 
     /**
      * @param string $baseUrl
@@ -123,11 +133,12 @@ abstract class Request
     }
 
     /**
+     * @param bool $upper
      * @return string
      */
-    public function getMethod(): string
+    public function getMethod(bool $upper = false): string
     {
-        return $this->method;
+        return ($upper === true) ? strtoupper($this->method) : $this->method;
     }
 
     /**
@@ -139,6 +150,22 @@ abstract class Request
     }
 
     /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data): void
+    {
+        $this->data = $data;
+    }
+
+    /**
      * If the $url is a relative URL, will attempt to create
      * a full URL by prepending $this->baseURI to it.
      *
@@ -147,16 +174,44 @@ abstract class Request
      */
     public function prepareURL(string $url = ''): string
     {
-        $this->setUrl($url);
+        if (! empty($url)) {
+            $this->setUrl($url);
+        }
 
-        return $this->getBaseUrl() . $this->getUrl();
+        $fillUrl = $this->getBaseUrl() . $this->getUrl();
+        if ($this->getMethod() === self::GET) {
+            $fillUrl .= ('?' .http_build_query($this->getData()));
+        }
+
+        return $fillUrl;
     }
+
+    /**
+     * @param array $options
+     */
+    public function setOptions(array $options): void
+    {
+        $this->options = $options;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOptions(): array
+    {
+        return $this->options;
+    }
+
+    /******************************************************************
+     * Chained / Fluent  Methods
+     ******************************************************************
+     */
 
     /**
      * @param array $data
      * @return CurlRequest
      */
-    public function data(array $data = []): self
+    public function data(array $data = [])
     {
         $this->data = $data;
 
@@ -169,7 +224,7 @@ abstract class Request
      * @param null $file
      * @return $this
      */
-    public function file($file = null): self
+    public function file($file = null)
     {
         $this->file = $file;
 
@@ -183,7 +238,7 @@ abstract class Request
      * @param bool $append force current url as full url
      * @return $this
      */
-    public function url(string $url = '', bool $append = true): self
+    public function url(string $url = '', bool $append = true)
     {
         if ($append === true) {
             $this->setUrl($url);
@@ -201,7 +256,7 @@ abstract class Request
      * @param string $method
      * @return $this
      */
-    public function method(string $method): self
+    public function method(string $method)
     {
         switch (strtolower($method)) {
             case self::GET :
@@ -258,6 +313,13 @@ abstract class Request
                 $this->method = self::GET;
             }
         }
+
+        return $this;
+    }
+
+    public function header(string $name, $value)
+    {
+        $this->setHeader($name, $value);
 
         return $this;
     }

@@ -125,6 +125,9 @@ abstract class Vendor
             throw new \Exception("Communication driver not found.");
         }
 
-        $this->client = new $className($this->getBaseUrl());
+        $this->client = new $className(
+            $this->getBaseUrl(),
+            $this->getConfig()
+        );
     }
 }

@@ -12,7 +12,7 @@ interface RequestInterface
      * @param array $data
      * @return self
      */
-    public function data(array $data = []): self;
+    public function data(array $data = []);
 
     /**
      * attach file object request
@@ -20,7 +20,7 @@ interface RequestInterface
      * @param array|null $file
      * @return self
      */
-    public function file($file = null): self;
+    public function file($file = null);
 
     /**
      * set the url to send api request
@@ -29,7 +29,7 @@ interface RequestInterface
      * @param bool $append force current url as full url
      * @return $this
      */
-    public function url(string $url = '', bool $append = true): self;
+    public function url(string $url = '', bool $append = true);
 
     /**
      * set the request method
@@ -37,7 +37,7 @@ interface RequestInterface
      * @param string $method
      * @return $this
      */
-    public function method(string $method): self;
+    public function method(string $method);
 
     /**
      * Convenience method for sending a request.

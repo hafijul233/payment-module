@@ -2,7 +2,6 @@
 
 namespace HishabKitab\Payment\Vendors;
 
-use HishabKitab\Payment\Abstracts\Request;
 use HishabKitab\Payment\Abstracts\Vendor;
 use HishabKitab\Payment\Driver\CurlRequest;
 use HishabKitab\Payment\Interfaces\VendorInterface;
@@ -25,12 +24,11 @@ class Test extends Vendor implements VendorInterface
         /**
          * @var CurlRequest $client
          */
-        return $this->getClient()
-            ->url('/test')
-            ->data([])
-            ->method(Request::GET)
-            ->request();
-        dd($client->get('/api/test'));
+        $return = $this->getClient()
+            ->url('/test')->data([])->get();
+        dd($return);
+
+        return [];
     }
 
     public function findOne(array $transactionInfo)

@@ -62,7 +62,7 @@ class Payment
     public function __construct()
     {
         $this->setConfig(config('payment'));
-        $this->setVendor('bkash', $options = []);
+        $this->setVendor('test', $options = []);
         dd($this->getVendor()->findMany());
     }
 }

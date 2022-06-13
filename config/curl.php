@@ -13,13 +13,6 @@ return [
     'version' => null, //[1.0, 1.1]
     'http_errors' => true,
     /**
-     * The number of milliseconds to delay before
-     * sending the request.
-     *
-     * @var float
-     */
-    'delay' => 0.0,
-    /**
      * Default values for when 'allow_redirects'
      * option is true.
      *

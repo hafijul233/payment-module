@@ -14,6 +14,25 @@ use HishabKitab\Payment\Interfaces\RequestInterface;
 class CurlRequest extends Request implements RequestInterface
 {
     /**
+     * Takes an array of options to set the following possible class properties:
+     *
+     * @param string $baseurl
+     * @param array $options
+     * @throws HttpException
+     */
+    public function __construct(string $baseurl, array $options = [])
+    {
+        if (! function_exists('curl_version')) {
+            throw HttpException::forMissingCurl();
+        }
+
+        $this->response = new Response();
+        $this->config = config('curl');
+        $this->setBaseUrl($baseurl);
+        $this->setOptions($options);
+    }
+
+    /**
      * Set the HTTP Authentication.
      *
      * @param string $username
@@ -34,68 +53,24 @@ class CurlRequest extends Request implements RequestInterface
     }
 
     /**
-     * Set form data to be sent.
-     *
-     * @param array $params
-     * @param bool $multipart Set TRUE if you are sending CURLFiles
-     *
-     * @return $this
-     */
-    public function setForm(array $params, bool $multipart = false): self
-    {
-        if ($multipart) {
-            $this->config['multipart'] = $params;
-        } else {
-            $this->config['form_params'] = $params;
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set JSON data to be sent.
-     *
-     * @param mixed $data
-     *
-     * @return $this
-     */
-    public function setJSON($data): self
-    {
-        $this->config['json'] = $data;
-
-        return $this;
-    }
-
-    /**
-     * Sets the correct settings based on the options array
-     * passed in.
-     * @param array $options
-     */
-    protected function parseOptions(array $options)
-    {
-        foreach ($options as $key => $value) {
-            $this->config[$key] = $value;
-        }
-    }
-
-    /**
      * Adds $this->headers to the cURL request.
      * @param array $curlOptions
      * @return array
      */
-    protected function applyRequestHeaders(array $curlOptions = []): array
+    protected function applyHeader(array $curlOptions = []): array
     {
-        if (empty($this->headers)) {
-            return $curlOptions;
+        //default headers
+        $this->setHeader('Host', parse_url($this->getBaseUrl(), PHP_URL_HOST));
+        $this->setHeader('Accept-Encoding', "gzip, deflate, br");
+        $this->setHeader('Connection', 'keep-alive');
+
+        //vendor communication headers
+        $this->setHeader('Accept', ($this->options['header']['accept_type'] ?? '*/*'));
+        $this->setHeader('Content-Type', ($this->options['header']['content_type'] ?? '*/*'));
+        //Load All Headers as string
+        foreach ($this->getHeader() as $header) {
+            $curlOptions[CURLOPT_HTTPHEADER][] = (string)$header;
         }
-
-        $set = [];
-
-        foreach (array_keys($this->headers) as $name) {
-            $set[] = $name . ': ' . $this->getHeaderLine($name);
-        }
-
-        $curlOptions[CURLOPT_HTTPHEADER] = $set;
 
         return $curlOptions;
     }
@@ -108,24 +83,69 @@ class CurlRequest extends Request implements RequestInterface
      */
     protected function applyMethod(array $curlOptions): array
     {
-        $method = $this->getMethod();
+        $curlOptions[CURLOPT_CUSTOMREQUEST] = $this->getMethod(true);
 
-        $curlOptions[CURLOPT_CUSTOMREQUEST] = $method;
+        switch ($this->getMethod()) {
+            case Request::GET :
+            {
+                //$this->method = Request::GET;
+
+                break;
+            }
+
+            case Request::DELETE :
+            {
+                //$this->method = Request::DELETE;
+
+                break;
+            }
+
+            case Request::HEAD :
+            {
+                $curlOptions[CURLOPT_NOBODY] = 1;
+
+                break;
+            }
+
+            case Request::OPTIONS :
+            {
+                //$this->method = Request::OPTIONS;
+
+                break;
+            }
+
+            case Request::PATCH :
+            {
+                //$this->method = Request::PATCH;
+
+                break;
+            }
+
+            case Request::POST :
+            case Request::PUT :
+            {
+                // See http://tools.ietf.org/html/rfc7230#section-3.3.2
+                if ($this->header('content-length') === null && ! isset($this->config['multipart'])) {
+                    $this->setHeader('Content-Length', '0');
+                }
+
+                break;
+            }
+
+            default:
+            {
+                //$this->method = Request::GET;
+            }
+        }
+
 
         $size = strlen($this->body ?? '');
 
         // Have content?
         if ($size > 0) {
-            return $this->applyBody($curlOptions);
-        }
-
-        if ($method === 'PUT' || $method === 'POST') {
-            // See http://tools.ietf.org/html/rfc7230#section-3.3.2
-            if ($this->header('content-length') === null && ! isset($this->config['multipart'])) {
-                $this->setHeader('Content-Length', '0');
+            if (! empty($this->body)) {
+                $curlOptions[CURLOPT_POSTFIELDS] = (string)$this->getBody();
             }
-        } elseif ($method === 'HEAD') {
-            $curlOptions[CURLOPT_NOBODY] = 1;
         }
 
         return $curlOptions;
@@ -138,10 +158,6 @@ class CurlRequest extends Request implements RequestInterface
      */
     protected function applyBody(array $curlOptions = []): array
     {
-        if (! empty($this->body)) {
-            $curlOptions[CURLOPT_POSTFIELDS] = (string)$this->getBody();
-        }
-
         return $curlOptions;
     }
 
@@ -232,18 +248,6 @@ class CurlRequest extends Request implements RequestInterface
             $curlOptions[CURLOPT_STDERR] = is_string($this->config['debug']) ? fopen($this->config['debug'], 'a+b') : fopen('php://stderr', 'wb');
         }
 
-        /*        // Decode Content
-                if (! empty($config['decode_content'])) {
-                    $accept = $this->getHeaderLine('Accept-Encoding');
-
-                    if ($accept) {
-                        $curlOptions[CURLOPT_ENCODING] = $accept;
-                    } else {
-                        $curlOptions[CURLOPT_ENCODING] = '';
-                        $curlOptions[CURLOPT_HTTPHEADER] = 'Accept-Encoding';
-                    }
-                }*/
-
         // Allow Redirects
         if ($this->config['allow_redirects'] === true) {
             $settings = $this->config['redirect'];
@@ -293,7 +297,6 @@ class CurlRequest extends Request implements RequestInterface
 
         // JSON
         if (isset($config['json'])) {
-            // Will be set as the body in `applyBody()`
             $json = json_encode($config['json']);
             $this->setBody($json);
             $this->setHeader('Content-Type', 'application/json');
@@ -313,45 +316,6 @@ class CurlRequest extends Request implements RequestInterface
     }
 
     /**
-     * Does the actual work of initializing cURL, setting the options,
-     * and grabbing the output.
-     *
-     * @throws HttpException
-     */
-    protected function sendRequest(array $curlOptions = []): string
-    {
-        $ch = curl_init();
-        curl_setopt_array($ch, $curlOptions);
-        // Send the request and wait for a response.
-        $output = curl_exec($ch);
-        if ($output === false) {
-            throw HttpException::forCurlError((string)curl_errno($ch), curl_error($ch));
-        }
-        curl_close($ch);
-
-        return $output;
-    }
-
-    /**
-     * Takes an array of options to set the following possible class properties:
-     *
-     * @param string $baseurl
-     * @param array $options
-     * @throws HttpException
-     */
-    public function __construct(string $baseurl, array $options = [])
-    {
-        if (! function_exists('curl_version')) {
-            throw HttpException::forMissingCurl();
-        }
-
-        $this->response = new Response();
-        $this->baseUrl = $baseurl;
-        $this->config = config('curl');
-        $this->parseOptions($options);
-    }
-
-    /**
      * Sends an HTTP request to the specified $url. If this is a relative
      * URL, it will be merged with $this->baseUrl to form a complete URL.
      *
@@ -361,20 +325,10 @@ class CurlRequest extends Request implements RequestInterface
      */
     public function request(array $options = []): Response
     {
-        $this->parseOptions($options);
-
         $url = $this->prepareURL();
 
         // Reset our curl options so we're on a fresh slate.
         $curlOptions = [];
-
-        if (! empty($this->config['query']) && is_array($this->config['query'])) {
-            // This is likely too naive a solution.
-            // Should look into handling when $url already
-            // has query vars on it.
-            $url .= '?' . http_build_query($this->config['query']);
-            unset($this->config['query']);
-        }
 
         $curlOptions[CURLOPT_URL] = $url;
         $curlOptions[CURLOPT_RETURNTRANSFER] = true;
@@ -385,14 +339,17 @@ class CurlRequest extends Request implements RequestInterface
 
         $curlOptions = $this->setCURLOptions($curlOptions, $this->config);
         $curlOptions = $this->applyMethod($curlOptions);
-        $curlOptions = $this->applyRequestHeaders($curlOptions);
+        $curlOptions = $this->applyHeader($curlOptions);
 
-        // Do we need to delay this request?
-        if ($this->config['delay'] > 0) {
-            usleep((int)$this->config['delay'] * 1000000);
+        $ch = curl_init();
+
+        curl_setopt_array($ch, $curlOptions);
+        // Send the request and wait for a response.
+        $output = curl_exec($ch);
+        if ($output === false) {
+            throw HttpException::forCurlError((string)curl_errno($ch), curl_error($ch));
         }
-
-        $output = $this->sendRequest($curlOptions);
+        curl_close($ch);
 
         // Set the string we want to break our response from
         $breakString = "\r\n\r\n";
