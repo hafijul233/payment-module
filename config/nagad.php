@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Test Api Configuration
+ * Nagad Api Configuration
  */
 return [
     'mode' => 'live', //sandbox , live
@@ -17,6 +17,10 @@ return [
         'endpoint' => 'http://api.hafijulislam.me/api',
         'username' => '7106UAT',
         'password' => '7106@Pass',
-        'excode' => '7106'
+        'excode' => '7106',
+    ],
+
+    'route' => [
+
     ],
 ];

@@ -25,6 +25,7 @@
         "laminas/laminas-escaper": "^2.10"
     },
     "require-dev": {
+        "filp/whoops": "^2.14",
         "friendsofphp/php-cs-fixer": "^3.0",
         "pestphp/pest": "^1.20",
         "spatie/ray": "^1.28"

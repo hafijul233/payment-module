@@ -7,72 +7,98 @@ use HishabKitab\Payment\Http\Response;
 interface RequestInterface
 {
     /**
-     * Convenience method for sending a GET request.
+     * attach array data to form request.
+     *
      * @param array $data
      * @return self
      */
-    public function data(array $data = []);
+    public function data(array $data = []): self;
 
     /**
-     * Convenience method for sending a GET request.
+     * attach file object request
+     *
      * @param array|null $file
      * @return self
      */
-    public function file($file = null);
+    public function file($file = null): self;
+
+    /**
+     * set the url to send api request
+     *
+     * @param string $url url start with '/' suffix
+     * @param bool $append force current url as full url
+     * @return $this
+     */
+    public function url(string $url = '', bool $append = true): self;
+
+    /**
+     * set the request method
+     *
+     * @param string $method
+     * @return $this
+     */
+    public function method(string $method): self;
+
+    /**
+     * Convenience method for sending a request.
+     *
+     * @param array $options
+     * @return Response
+     */
+    public function request(array $options = []): Response;
 
     /**
      * Convenience method for sending a GET request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function get(string $url, array $options = []): Response;
+    public function get(array $options = []): Response;
 
     /**
      * Convenience method for sending a DELETE request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function delete(string $url, array $options = []): Response;
+    public function delete(array $options = []): Response;
 
     /**
      * Convenience method for sending a HEAD request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function head(string $url, array $options = []): Response;
+    public function head(array $options = []): Response;
 
     /**
      * Convenience method for sending an OPTIONS request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function options(string $url, array $options = []): Response;
+    public function options(array $options = []): Response;
 
     /**
      * Convenience method for sending a PATCH request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function patch(string $url, array $options = []): Response;
+    public function patch(array $options = []): Response;
 
     /**
      * Convenience method for sending a POST request.
-     * @param string $url
      * @param array $options
      * @return Response
      */
-    public function post(string $url, array $options = []): Response;
+    public function post(array $options = []): Response;
 
     /**
      * Convenience method for sending a PUT request.
-     * @param string $url
+     *
      * @param array $options
      * @return Response
      */
-    public function put(string $url, array $options = []): Response;
+    public function put(array $options = []): Response;
 }

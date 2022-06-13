@@ -6,7 +6,6 @@ use HishabKitab\Payment\Abstracts\Request;
 use HishabKitab\Payment\Exceptions\HttpException;
 use HishabKitab\Payment\Http\Response;
 use HishabKitab\Payment\Interfaces\RequestInterface;
-use HishabKitab\Payment\Libraries\URI;
 
 /**
  * Class CurlRequest
@@ -71,7 +70,6 @@ class CurlRequest extends Request implements RequestInterface
      * Sets the correct settings based on the options array
      * passed in.
      * @param array $options
-     * @throws HttpException
      */
     protected function parseOptions(array $options)
     {
@@ -108,11 +106,10 @@ class CurlRequest extends Request implements RequestInterface
      * @param array $curlOptions
      * @return array
      */
-    protected function applyMethod(string $method, array $curlOptions): array
+    protected function applyMethod(array $curlOptions): array
     {
-        $method = strtoupper($method);
+        $method = $this->getMethod();
 
-        $this->method = $method;
         $curlOptions[CURLOPT_CUSTOMREQUEST] = $method;
 
         $size = strlen($this->body ?? '');
@@ -319,20 +316,17 @@ class CurlRequest extends Request implements RequestInterface
      * Does the actual work of initializing cURL, setting the options,
      * and grabbing the output.
      *
+     * @throws HttpException
      */
     protected function sendRequest(array $curlOptions = []): string
     {
         $ch = curl_init();
-
         curl_setopt_array($ch, $curlOptions);
-
         // Send the request and wait for a response.
         $output = curl_exec($ch);
-
         if ($output === false) {
             throw HttpException::forCurlError((string)curl_errno($ch), curl_error($ch));
         }
-
         curl_close($ch);
 
         return $output;
@@ -341,37 +335,35 @@ class CurlRequest extends Request implements RequestInterface
     /**
      * Takes an array of options to set the following possible class properties:
      *
-     * @param string $baseURI
+     * @param string $baseurl
      * @param array $options
      * @throws HttpException
      */
-    public function __construct($baseURI = '', array $options = [])
+    public function __construct(string $baseurl, array $options = [])
     {
         if (! function_exists('curl_version')) {
             throw HttpException::forMissingCurl();
         }
 
         $this->response = new Response();
-        $this->baseURI = ($baseURI instanceof URI) ? $baseURI : new URI($baseURI);
+        $this->baseUrl = $baseurl;
         $this->config = config('curl');
         $this->parseOptions($options);
     }
 
     /**
      * Sends an HTTP request to the specified $url. If this is a relative
-     * URL, it will be merged with $this->baseURI to form a complete URL.
+     * URL, it will be merged with $this->baseUrl to form a complete URL.
      *
-     * @param string $method
-     * @param string $url
      * @param array $options
      * @return Response
      * @throws HttpException
      */
-    protected function request(string $method, string $url, array $options = []): Response
+    public function request(array $options = []): Response
     {
         $this->parseOptions($options);
 
-        $url = $this->prepareURL($url);
+        $url = $this->prepareURL();
 
         // Reset our curl options so we're on a fresh slate.
         $curlOptions = [];
@@ -392,7 +384,7 @@ class CurlRequest extends Request implements RequestInterface
         $curlOptions[CURLOPT_SAFE_UPLOAD] = true;
 
         $curlOptions = $this->setCURLOptions($curlOptions, $this->config);
-        $curlOptions = $this->applyMethod($method, $curlOptions);
+        $curlOptions = $this->applyMethod($curlOptions);
         $curlOptions = $this->applyRequestHeaders($curlOptions);
 
         // Do we need to delay this request?
@@ -431,113 +423,5 @@ class CurlRequest extends Request implements RequestInterface
         }
 
         return $this->response;
-    }
-
-    /**
-     * Convenience method for sending a GET request.
-     * @param string $url
-     * @param array $data
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function get(string $url, array $options = []): Response
-    {
-        return $this->request('get', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a DELETE request.
-     * @param string $url
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function delete(string $url, array $options = []): Response
-    {
-        return $this->request('delete', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a HEAD request.
-     * @param string $url
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function head(string $url, array $options = []): Response
-    {
-        return $this->request('head', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending an OPTIONS request.
-     * @param string $url
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function options(string $url, array $options = []): Response
-    {
-        return $this->request('options', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a PATCH request.
-     * @param string $url
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function patch(string $url, array $options = []): Response
-    {
-        return $this->request('patch', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a POST request.
-     * @param string $url
-     * @param array $data
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function post(string $url, array $options = []): Response
-    {
-        return $this->request('post', $url, $options);
-    }
-
-    /**
-     * Convenience method for sending a PUT request.
-     * @param string $url
-     * @param array $options
-     * @return Response
-     * @throws HttpException
-     */
-    public function put(string $url, array $options = []): Response
-    {
-        return $this->request('put', $url, $options);
-    }
-
-    /**
-     * @param array $data
-     * @return CurlRequest
-     */
-    public function data(array $data = []): self
-    {
-        $this->data = $data;
-
-        return $this;
-    }
-
-    /**
-     * @param null $file
-     * @return CurlRequest
-     */
-    public function file($file = null): self
-    {
-        $this->file = $file;
-
-        return $this;
     }
 }

@@ -17,7 +17,7 @@ return [
         'endpoint' => 'https://fex.agranibank.org/remapiuat',
         'username' => '7106UAT',
         'password' => '7106@Pass',
-        'excode' => '7106'
+        'excode' => floatval('7106')
     ],
 
 /*    'signature' => [

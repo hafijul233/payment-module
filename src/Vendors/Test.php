@@ -2,6 +2,7 @@
 
 namespace HishabKitab\Payment\Vendors;
 
+use HishabKitab\Payment\Abstracts\Request;
 use HishabKitab\Payment\Abstracts\Vendor;
 use HishabKitab\Payment\Driver\CurlRequest;
 use HishabKitab\Payment\Interfaces\VendorInterface;
@@ -13,10 +14,10 @@ class Test extends Vendor implements VendorInterface
      */
     public function __construct(array $options = [])
     {
-        $this->setConfig(config('test'));
-        $this->setMode(($this->config['mode'] ?? 'sandbox'));
-        $this->setBaseURI($this->config[$this->getMode()]['endpoint']);
-        $this->setClient('curl');
+        $this->setConfig();
+        $this->setMode();
+        $this->setBaseURl();
+        $this->setClient();
     }
 
     public function findMany(array $filters = []): array
@@ -24,7 +25,11 @@ class Test extends Vendor implements VendorInterface
         /**
          * @var CurlRequest $client
          */
-        $client = $this->getClient();
+        return $this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request();
         dd($client->get('/api/test'));
     }
 

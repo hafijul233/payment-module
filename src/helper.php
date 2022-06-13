@@ -69,7 +69,7 @@ if (! function_exists('esc')) {
 if (! function_exists('config')) {
     /**
      * More simple way of getting config instances from Factories
-     *
+     * a.b.c
      * @return mixed
      */
     function config(string $location, $default = null)

@@ -1,8 +1,8 @@
 <?php
 return [
-    'driver' => 'curl',
+    'driver' => 'guzzle',
     'drivers' => [
-        'curl' => \HishabKitab\Payment\Driver\CurlRequest::class
+        'curl' => \HishabKitab\Payment\Driver\CurlRequest::class,
     ],
     'vendor' => 'test',
     'vendors' => [

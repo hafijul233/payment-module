@@ -2,8 +2,6 @@
 
 namespace HishabKitab\Payment\Abstracts;
 
-use HishabKitab\Payment\Libraries\URI;
-
 abstract class Vendor
 {
     /**
@@ -12,9 +10,9 @@ abstract class Vendor
     protected $config;
 
     /**
-     * @var URI
+     * @var string
      */
-    public $baseURI;
+    public $baseUrl;
 
     /**
      * @var array
@@ -42,25 +40,31 @@ abstract class Vendor
     /**
      * @param array $config
      */
-    public function setConfig(array $config): void
+    public function setConfig(array $config = []): void
     {
-        $this->config = $config;
+        if (!empty($config)) {
+            $this->config = $config;
+        } else {
+            $this->config = config('test');
+        }
     }
 
     /**
-     * @return URI
+     * @return string
      */
-    public function getBaseURI(): URI
+    public function getBaseUrl(): string
     {
-        return $this->baseURI;
+        return $this->baseUrl;
     }
 
     /**
-     * @param string $baseURI
+     * @param string $baseUrl
      */
-    public function setBaseURI(string $baseURI): void
+    public function setBaseUrl(string $baseUrl = ''): void
     {
-        $this->baseURI = new URI($baseURI);
+        $this->baseUrl = (!empty($baseUrl))
+            ? $baseUrl
+            : $this->config[$this->getMode()]['endpoint'];
     }
 
     /**
@@ -82,9 +86,11 @@ abstract class Vendor
     /**
      * @param string $mode
      */
-    public function setMode(string $mode): void
+    public function setMode(string $mode = ''): void
     {
-        $this->mode = $mode;
+        $this->mode = (!empty($mode))
+            ? $mode
+            : $this->config['mode'] ?? 'sandbox';
     }
 
     /**
@@ -107,13 +113,18 @@ abstract class Vendor
      * @param mixed $client
      * @throws \Exception
      */
-    public function setClient(string $client): void
+    public function setClient(string $client = ''): void
     {
-        $className = config("payment.drivers.{$client}");
+        $paymentConfig = config('payment');
+
+        $className = (isset($paymentConfig['drivers'][$client]))
+            ? ($paymentConfig['drivers'][$client] ?? null)
+            : ($paymentConfig['drivers'][$paymentConfig['driver']] ?? null);
 
         if ($className == null) {
             throw new \Exception("Communication driver not found.");
         }
-        $this->client = new $className($this->getBaseURI());
+
+        $this->client = new $className($this->getBaseUrl());
     }
 }
