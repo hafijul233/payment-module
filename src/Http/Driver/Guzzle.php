@@ -8,25 +8,20 @@ use HishabKitab\Payment\Http\Response;
 use HishabKitab\Payment\Interfaces\RequestInterface;
 
 /**
- * Class Curl
+ * Class Guzzle
  * @package HishabKitab\Payment\Http\Driver
  */
-class Curl extends Request implements RequestInterface
+class Guzzle extends Request implements RequestInterface
 {
     /**
      * Takes an array of options to set the following possible class properties:
      *
      * @param string $baseurl
      * @param array $options
-     * @throws HttpException
      */
     public function __construct(string $baseurl, array $options = [])
     {
-        $this->config = config('curl');
-
-        if (! function_exists('curl_version')) {
-            throw HttpException::forMissingCurl();
-        }
+        $this->config = config('guzzle');
 
         $this->setBaseUrl($baseurl);
         $this->setOptions($options);
@@ -76,7 +71,7 @@ class Curl extends Request implements RequestInterface
         // Disable @file uploads in post data.
         $curlOptions[CURLOPT_SAFE_UPLOAD] = true;
 
-        $curlOptions = $this->setCURLOptions($curlOptions);
+        $curlOptions = $this->setGuzzleOptions($curlOptions);
         $curlOptions = $this->applyMethod($curlOptions);
         $curlOptions = $this->applyHeader($curlOptions);
 
@@ -128,13 +123,13 @@ class Curl extends Request implements RequestInterface
      * @return array
      * @throws HttpException
      */
-    protected function setCURLOptions(array $curlOptions = []): array
+    protected function setGuzzleOptions(array $curlOptions = []): array
     {
         // Auth Headers
-        if (! empty($this->config['auth'])) {
+        if (!empty($this->config['auth'])) {
             $curlOptions[CURLOPT_USERPWD] = $this->config['auth'][0] . ':' . $this->config['auth'][1];
 
-            if (! empty($this->config['auth'][2]) && strtolower($this->config['auth'][2]) === 'digest') {
+            if (!empty($this->config['auth'][2]) && strtolower($this->config['auth'][2]) === 'digest') {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_DIGEST;
             } else {
                 $curlOptions[CURLOPT_HTTPAUTH] = CURLAUTH_BASIC;
@@ -142,7 +137,7 @@ class Curl extends Request implements RequestInterface
         }
 
         // Certificate
-        if (! empty($this->config['cert'])) {
+        if (!empty($this->config['cert'])) {
             $cert = $this->config['cert'];
 
             if (is_array($cert)) {
@@ -150,7 +145,7 @@ class Curl extends Request implements RequestInterface
                 $cert = $cert[0];
             }
 
-            if (! is_file($cert)) {
+            if (!is_file($cert)) {
                 throw HttpException::forSSLCertNotFound($cert);
             }
 
@@ -162,7 +157,7 @@ class Curl extends Request implements RequestInterface
             if (is_string($this->config['verify'])) {
                 $file = realpath($this->config['ssl_key']) ?: $this->config['ssl_key'];
 
-                if (! is_file($file)) {
+                if (!is_file($file)) {
                     throw HttpException::forInvalidSSLKey($this->config['ssl_key']);
                 }
 
@@ -207,7 +202,7 @@ class Curl extends Request implements RequestInterface
         $curlOptions[CURLOPT_CONNECTTIMEOUT_MS] = (float)$this->config['connect_timeout'] * 1000;
 
         // Post Data - application/x-www-form-urlencoded
-        if (! empty($this->config['form_params']) && is_array($this->config['form_params'])) {
+        if (!empty($this->config['form_params']) && is_array($this->config['form_params'])) {
             $postFields = http_build_query($this->config['form_params']);
             $curlOptions[CURLOPT_POSTFIELDS] = $postFields;
 
@@ -218,7 +213,7 @@ class Curl extends Request implements RequestInterface
         }
 
         // Post Data - multipart/form-data
-        if (! empty($this->config['multipart']) && is_array($this->config['multipart'])) {
+        if (!empty($this->config['multipart']) && is_array($this->config['multipart'])) {
             // setting the POSTFIELDS option automatically sets multipart
             $curlOptions[CURLOPT_POSTFIELDS] = $this->config['multipart'];
         }
@@ -295,7 +290,7 @@ class Curl extends Request implements RequestInterface
             case Request::PUT :
             {
                 // See http://tools.ietf.org/html/rfc7230#section-3.3.2
-                if ($this->getHeader('content-length') === null && ! isset($this->config['multipart'])) {
+                if ($this->getHeader('content-length') === null && !isset($this->config['multipart'])) {
                     $this->setHeader('Content-Length', '0');
                 }
 
@@ -315,7 +310,7 @@ class Curl extends Request implements RequestInterface
 
         // Have content?
         if ($size > 0) {
-            if (! empty($this->body)) {
+            if (!empty($this->body)) {
                 $curlOptions[CURLOPT_POSTFIELDS] = (string)$this->getBody();
             }
         }
