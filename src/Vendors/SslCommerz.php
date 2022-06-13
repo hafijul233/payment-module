@@ -1,15 +1,12 @@
 <?php
 
-
 namespace HishabKitab\Payment\Vendors;
-
 
 use HishabKitab\Payment\Abstracts\Vendor;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 
 class SslCommerz extends Vendor implements VendorInterface
 {
-
     /**
      * @inheritDoc
      */
