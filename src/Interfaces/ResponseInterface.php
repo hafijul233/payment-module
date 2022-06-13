@@ -122,7 +122,7 @@ interface ResponseInterface
      *
      * @return self
      */
-    public function setStatusCode(int $code, string $reason = ''): self;
+    public function setStatusCode(int $code, string $reason = '');
 
     /**
      * Gets the response response phrase associated with the status code.
@@ -143,7 +143,7 @@ interface ResponseInterface
      * @param DateTime $date
      * @return ResponseInterface
      */
-    public function setDate(DateTime $date): self;
+    public function setDate(DateTime $date);
 
     /**
      * Sets the Last-Modified date header.
@@ -154,17 +154,6 @@ interface ResponseInterface
      * @param DateTime|string $date
      */
     public function setLastModified($date);
-
-    /**
-     * Set the Link Header
-     *
-     * @see http://tools.ietf.org/html/rfc5988
-     *
-     * @return Response
-     *
-     * @todo Recommend moving to Pager
-     */
-    public function setLink(PagerInterface $pager);
 
     /**
      * Sets the Content Type header for this response with the mime type
@@ -187,17 +176,7 @@ interface ResponseInterface
      *
      * @return $this
      */
-    public function setJSON($body, bool $unencoded = false): self;
-
-    /**
-     * Returns the current body, converted to JSON is it isn't already.
-     *
-     * @return mixed|string
-     * @throws InvalidArgumentException If the body property is not array.
-     *
-     */
-    public function getJSON();
-
+    public function setJSON($body, bool $unencoded = false);
     /**
      * Converts $body into XML, and sets the correct Content-Type.
      *
@@ -205,28 +184,13 @@ interface ResponseInterface
      *
      * @return ResponseInterface
      */
-    public function setXML($body): self;
-
-    /**
-     * Retrieves the current body into XML and returns it.
-     *
-     * @return mixed|string
-     * @throws InvalidArgumentException If the body property is not array.
-     *
-     */
-    public function getXML();
+    public function setXML($body);
 
     //--------------------------------------------------------------------
     // Cache Control Methods
     //
     // http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
     //--------------------------------------------------------------------
-
-    /**
-     * Sets the appropriate headers to ensure this response
-     * is not cached by the browsers.
-     */
-    public function noCache();
 
     /**
      * A shortcut method that allows the developer to set all of the
@@ -255,92 +219,7 @@ interface ResponseInterface
      * @param array $options
      * @return ResponseInterface
      */
-    public function setCache(array $options = []): self;
-
-    //--------------------------------------------------------------------
-    // Output Methods
-    //--------------------------------------------------------------------
-
-    /**
-     * Sends the output to the browser.
-     *
-     * @return ResponseInterface
-     */
-    public function send(): self;
-
-    /**
-     * Sends the headers of this HTTP request to the browser.
-     *
-     * @return Response
-     */
-    public function sendHeaders();
-
-    /**
-     * Sends the Body of the message to the browser.
-     *
-     * @return Response
-     */
-    public function sendBody();
-
-    //--------------------------------------------------------------------
-    // Cookie Methods
-    //--------------------------------------------------------------------
-
-    /**
-     * Set a cookie
-     *
-     * Accepts an arbitrary number of binds (up to 7) or an associative
-     * array in the first parameter containing all the values.
-     *
-     * @param array|string $name Cookie name or array containing binds
-     * @param string $value Cookie value
-     * @param string $expire Cookie expiration time in seconds
-     * @param string $domain Cookie domain (e.g.: '.yourdomain.com')
-     * @param string $path Cookie path (default: '/')
-     * @param string $prefix Cookie name prefix
-     * @param bool $secure Whether to only transfer cookies via SSL
-     * @param bool $httponly Whether only make the cookie accessible via HTTP (no javascript)
-     * @param string|null $samesite
-     *
-     * @return ResponseInterface
-     */
-    public function setCookie(
-        $name,
-        string $value = '',
-        string $expire = '',
-        string $domain = '',
-        string $path = '/',
-        string $prefix = '',
-        bool $secure = false,
-        bool $httponly = false,
-        string $samesite = null
-    ): self;
-
-    /**
-     * Checks to see if the Response has a specified cookie or not.
-     */
-    public function hasCookie(string $name, ?string $value = null, string $prefix = ''): bool;
-
-    /**
-     * Returns the cookie
-     *
-     * @return Cookie|Cookie[]|null
-     */
-    public function getCookie(?string $name = null, string $prefix = '');
-
-    /**
-     * Sets a cookie to be deleted when the response is sent.
-     *
-     * @return $this
-     */
-    public function deleteCookie(string $name = '', string $domain = '', string $path = '/', string $prefix = '');
-
-    /**
-     * Returns all cookies currently set.
-     *
-     * @return Cookie[]
-     */
-    public function getCookies();
+    public function setCache(array $options = []);
 
     //--------------------------------------------------------------------
     // Response Methods
@@ -357,18 +236,4 @@ interface ResponseInterface
      * @throws HttpException For invalid status code.
      */
     public function redirect(string $uri, string $method = 'auto', ?int $code = null): self;
-
-    /**
-     * Force a download.
-     *
-     * Generates the headers that force a download to happen. And
-     * sends the file to the browser.
-     *
-     * @param string $filename The path to the file to send
-     * @param string|null $data The data to be downloaded
-     * @param bool $setMime Whether to try and send the actual MIME type
-     *
-     * @return DownloadResponse|null
-     */
-    public function download(string $filename = '', $data = '', bool $setMime = false);
 }

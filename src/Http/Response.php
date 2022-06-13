@@ -6,9 +6,10 @@ use DateTime;
 use DateTimeZone;
 use HishabKitab\Payment\Exceptions\HttpException;
 use HishabKitab\Payment\Formatter\Format;
+use HishabKitab\Payment\Interfaces\ResponseInterface;
 use InvalidArgumentException;
 
-class Response
+class Response implements ResponseInterface
 {
     public const JSON = 'application/json';
     public const XML = 'application/json';
@@ -181,13 +182,17 @@ class Response
      *
      * @see DownloadResponse::noCache()
      */
-    public function noCache()
+    private function noCache()
     {
         $this->removeHeader('Cache-control');
         $this->setHeader('Cache-control', ['no-store', 'max-age=0', 'no-cache']);
 
         return $this;
     }
+
+    //--------------------------------------------------------------------
+    // Format Methods
+    //--------------------------------------------------------------------
 
     /**
      * Converts the $body into JSON and sets the Content Type header.
@@ -232,7 +237,7 @@ class Response
      * @throws InvalidArgumentException If the body property is not string or array.
      *
      */
-    protected function formatBody($body, string $format)
+    private function formatBody($body, string $format)
     {
         $this->bodyFormat = ($format === 'json-unencoded' ? 'json' : $format);
         $mime = "application/{$this->bodyFormat}";
@@ -245,6 +250,19 @@ class Response
         }
 
         return $body;
+    }
+
+    /**
+     * Removes a header from the list of headers we track.
+     *
+     * @return $this
+     */
+    private function removeHeader(string $name): self
+    {
+        $origName = $this->getHeaderName($name);
+        unset($this->headers[$origName], $this->headerMap[strtolower($name)]);
+
+        return $this;
     }
 
     /**
@@ -264,19 +282,6 @@ class Response
 
         $this->removeHeader('Content-Type'); // replace existing content type
         $this->setHeader('Content-Type', $mime);
-
-        return $this;
-    }
-
-    /**
-     * Removes a header from the list of headers we track.
-     *
-     * @return $this
-     */
-    public function removeHeader(string $name): self
-    {
-        $origName = $this->getHeaderName($name);
-        unset($this->headers[$origName], $this->headerMap[strtolower($name)]);
 
         return $this;
     }
@@ -334,12 +339,6 @@ class Response
         return $this;
     }
 
-    //--------------------------------------------------------------------
-    // Cache Control Methods
-    //
-    // http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9
-    //--------------------------------------------------------------------
-
     /**
      * Sets the Last-Modified date header.
      *
@@ -362,17 +361,13 @@ class Response
         return $this;
     }
 
-    //--------------------------------------------------------------------
-    // Output Methods
-    //--------------------------------------------------------------------
-
     /**
      * Sets the date header
      *
      * @param DateTime $date
      * @return self
      */
-    public function setDate(DateTime $date): self
+    public function setDate(DateTime $date)
     {
         $date->setTimezone(new DateTimeZone('UTC'));
 
@@ -380,6 +375,10 @@ class Response
 
         return $this;
     }
+
+    //--------------------------------------------------------------------
+    // Output Methods
+    //--------------------------------------------------------------------
 
     /**
      * Returns the HTTP Protocol Version.
@@ -467,29 +466,6 @@ class Response
         $this->reason = !empty($reason) ? $reason : static::$statusCodes[$code];
 
         return $this;
-    }
-
-    /**
-     * Gets the response reason phrase associated with the status code.
-     *
-     * Because a reason phrase is not a required element in a response
-     * status line, the reason phrase value MAY be null. Implementations MAY
-     * choose to return the default RFC 7231 recommended reason phrase (or those
-     * listed in the IANA HTTP Status Code Registry) for the response's
-     * status code.
-     *
-     * @see http://tools.ietf.org/html/rfc7231#section-6
-     * @see http://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
-     *
-     * @return string Reason phrase; must return an empty string if none present.
-     */
-    public function getReasonPhrase()
-    {
-        if ($this->reason === '') {
-            return !empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
-        }
-
-        return $this->reason;
     }
 
     /**
@@ -675,6 +651,10 @@ class Response
      */
     public function getReason(): string
     {
-        return $this->getReasonPhrase();
+        if ($this->reason === '') {
+            return !empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
+        }
+
+        return $this->reason;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace HishabKitab\Payment\Http;
 
-use HishabKitab\Payment\Driver\Curl;
 use HishabKitab\Payment\Exceptions\HttpException;
 use HishabKitab\Payment\Interfaces\ResponseInterface;
 
@@ -21,6 +20,7 @@ class Request
     public const POST = 'post';
 
     public const PUT = 'put';
+
     /**
      * @var array
      */
@@ -161,7 +161,7 @@ class Request
      * set the request method
      *
      * @param string $method
-     * @return \HishabKitab\Payment\Abstracts\Request
+     * @return Request
      */
     public function method(string $method)
     {
@@ -263,7 +263,7 @@ class Request
 
     /**
      * @param array $data
-     * @return Curl
+     * @return self
      */
     public function data(array $data = [])
     {
