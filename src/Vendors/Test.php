@@ -4,7 +4,7 @@ namespace HishabKitab\Payment\Vendors;
 
 use Exception;
 use HishabKitab\Payment\Abstracts\Vendor;
-use HishabKitab\Payment\Driver\CurlRequest;
+use HishabKitab\Payment\Driver\Curl;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 
 class Test extends Vendor implements VendorInterface
@@ -23,7 +23,7 @@ class Test extends Vendor implements VendorInterface
     public function findMany(array $filters = []): array
     {
         /**
-         * @var CurlRequest $client
+         * @var Curl $client
          */
         $return = $this->getClient()
             ->url('/test')->data([])->get();

@@ -1,6 +1,6 @@
 <?php
 
-namespace HishabKitab\Payment\Formatter;
+namespace HishabKitab\Payment\Format;
 
 use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Interfaces\FormatInterface;

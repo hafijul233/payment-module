@@ -1,8 +1,7 @@
 <?php
 
-namespace HishabKitab\Payment\Formatter;
+namespace HishabKitab\Payment\Format;
 
-use HishabKitab\Payment\Config\Format as FormatterConfig;
 use HishabKitab\Payment\Interfaces\FormatInterface;
 
 /**

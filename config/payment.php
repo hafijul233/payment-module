@@ -3,7 +3,7 @@
 return [
     'driver' => 'curl',
     'drivers' => [
-        'curl' => \HishabKitab\Payment\Driver\CurlRequest::class,
+        'curl' => \HishabKitab\Payment\Driver\Curl::class,
     ],
     'vendor' => 'test',
     'vendors' => [

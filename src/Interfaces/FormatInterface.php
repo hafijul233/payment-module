@@ -9,9 +9,9 @@ interface FormatInterface
     /**
      * Takes the given data and formats it.
      *
-     * @param array|string $data
+     * @param mixed $data
      *
-     * @return mixed
+     * @return bool|string
      */
     public function format($data);
 }
