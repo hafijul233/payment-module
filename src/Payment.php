@@ -6,6 +6,10 @@ use Exception;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 use Kint\Kint;
 
+/**
+ * Class Payment
+ * @package HishabKitab\Payment
+ */
 class Payment implements VendorInterface
 {
     /**

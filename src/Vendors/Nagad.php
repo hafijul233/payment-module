@@ -2,62 +2,81 @@
 
 namespace HishabKitab\Payment\Vendors;
 
+use Exception;
 use HishabKitab\Payment\Abstracts\Vendor;
+use HishabKitab\Payment\Http\Request;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 
+/**
+ * Class Nagad
+ * @package HishabKitab\Payment\Vendors
+ */
 class Nagad extends Vendor implements VendorInterface
 {
     /**
-     * @param array $filters
-     * @return array
+     * @throws Exception
      */
+    public function __construct(array $options = [])
+    {
+        $this->setConfig();
+        $this->setMode();
+        $this->setBaseURl();
+        $this->setClient();
+    }
+
     public function findMany(array $filters = []): array
     {
-        // TODO: Implement findMany() method.
+        return [$this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request(),
+        ];
     }
 
-    /**
-     * @param array $transactionInfo
-     * @return mixed|void
-     */
-    public function findOne(array $transactionInfo)
+    public function findOne(array $transactionInfo = [])
     {
-        // TODO: Implement findOne() method.
+        return $this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request();
     }
 
-    /**
-     * @param array $inputs
-     * @return array
-     */
-    public function createTransaction(array $inputs = []): array
+    public function createTransaction(array $transactionInfo = []): array
     {
-        // TODO: Implement createTransaction() method.
+        return [$this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request(),
+        ];
     }
 
-    /**
-     * @param array $transactionInfo
-     * @return mixed|void
-     */
-    public function transactionStatus(array $transactionInfo)
+    public function transactionStatus(array $transactionInfo = [])
     {
-        // TODO: Implement transactionStatus() method.
+        return $this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request();
     }
 
-    /**
-     * @param array $transactionInfo
-     * @return mixed|void
-     */
-    public function cancelTransaction(array $transactionInfo)
+    public function cancelTransaction(array $transactionInfo = [])
     {
-        // TODO: Implement cancelTransaction() method.
+        return $this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request();
     }
 
-    /**
-     * @param array $transactionInfo
-     * @return mixed|void
-     */
-    public function refundTransaction(array $transactionInfo)
+    public function refundTransaction(array $transactionInfo = [])
     {
-        // TODO: Implement refundTransaction() method.
+        return $this->getClient()
+            ->url('/test')
+            ->data([])
+            ->method(Request::GET)
+            ->request();
     }
 }

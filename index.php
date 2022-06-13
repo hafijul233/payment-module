@@ -7,7 +7,7 @@ require_once 'vendor/autoload.php';
 $whoops = new Run();
 $whoops->pushHandler(new PrettyPageHandler());
 $whoops->register();
-$payment = new Payment('test');
+$payment = new Payment('nagad');
 $payment->findMany();
 $payment->findOne();
 $payment->createTransaction();

@@ -7,6 +7,10 @@ use HishabKitab\Payment\Abstracts\Vendor;
 use HishabKitab\Payment\Http\Request;
 use HishabKitab\Payment\Interfaces\VendorInterface;
 
+/**
+ * Class Test
+ * @package HishabKitab\Payment\Vendors
+ */
 class Test extends Vendor implements VendorInterface
 {
     /**

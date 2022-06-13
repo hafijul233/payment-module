@@ -1,23 +1,10 @@
 <?php
-/*
- *
- * -------------------------------------------------------------
- * Copyright (c) 2020
- * -All Rights Preserved By Ariful Islam
- * -If you have any query then knock me at
- * arif98741@gmail.com
- * See my profile @ https://github.com/arif98741
- * ----------------------------------------------------------------
- */
 
-namespace Xenon\NagadApi\lib;
+namespace HishabKitab\Payment\Libraries;
 
 /**
  * Class Key
- * This class is using for generating data from environment variable .env
- * This any change in .env file will affect array vale of $_ENV; Array value of
- * .env can be easily find using generateEnv of Key object
- * @package Xenon\NagadApi\lib
+ * @package HishabKitab\Payment\Libraries
  */
 class Key
 {

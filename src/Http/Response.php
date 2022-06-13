@@ -4,6 +4,7 @@ namespace HishabKitab\Payment\Http;
 
 use DateTime;
 use DateTimeZone;
+use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Exceptions\HttpException;
 use HishabKitab\Payment\Format\Format;
 use HishabKitab\Payment\Interfaces\ResponseInterface;
@@ -200,6 +201,7 @@ class Response implements ResponseInterface
      * @param array|string $body
      *
      * @return $this
+     * @throws FormatException
      */
     public function setJSON($body, bool $unencoded = false)
     {
@@ -214,6 +216,7 @@ class Response implements ResponseInterface
      * @param array|string $body
      *
      * @return $this
+     * @throws FormatException
      */
     public function setXML($body)
     {
@@ -233,8 +236,8 @@ class Response implements ResponseInterface
      * @param array|string $body
      * @param string $format Valid: json, xml
      *
-     * @return mixed
-     * @throws InvalidArgumentException If the body property is not string or array.
+     * @return bool|string
+     * @throws InvalidArgumentException|FormatException If the body property is not string or array.
      *
      */
     private function formatBody($body, string $format)
@@ -392,8 +395,8 @@ class Response implements ResponseInterface
      * Sets the HTTP protocol version.
      *
      * @return $this
-     * @throws HttpException For invalid protocols
      *
+     * @throws HttpException
      */
     public function setProtocolVersion(string $version): self
     {
@@ -404,9 +407,9 @@ class Response implements ResponseInterface
         // Make sure that version is in the correct format
         $version = number_format((float)$version, 1);
 
-        /*if (! in_array($version, $this->validProtocolVersions, true)) {
+        if (! in_array($version, $this->validProtocolVersions, true)) {
             throw HttpException::forInvalidHTTPProtocol(implode(', ', $this->validProtocolVersions));
-        }*/
+        }
 
         $this->protocolVersion = $version;
 
