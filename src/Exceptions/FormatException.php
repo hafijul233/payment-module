@@ -1,8 +1,6 @@
 <?php
 
-
 namespace HishabKitab\Payment\Exceptions;
-
 
 use Exception;
 
@@ -42,7 +40,6 @@ class FormatException extends Exception
     public static function forInvalidMime(string $mime): self
     {
         return new static("No Formatter defined for mime type: \"{$mime}\".");
-
     }
 
     /**

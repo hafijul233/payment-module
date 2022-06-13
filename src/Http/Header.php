@@ -74,6 +74,7 @@ class Header
             $value = trim($value);
         }
         $this->value = $value ?? '';
+
         return $this;
     }
 

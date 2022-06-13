@@ -3,7 +3,6 @@
 namespace HishabKitab\Payment\Interfaces;
 
 use DateTime;
-use HishabKitab\Payment\Exceptions\HttpException;
 use InvalidArgumentException;
 
 /**
@@ -177,6 +176,7 @@ interface ResponseInterface
      * @return $this
      */
     public function setJSON($body, bool $unencoded = false);
+
     /**
      * Converts $body into XML, and sets the correct Content-Type.
      *
