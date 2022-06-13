@@ -163,7 +163,7 @@ interface ResponseInterface
      * @param string $charset
      * @return ResponseInterface
      */
-    public function setContentType(string $mime, string $charset = 'UTF-8'): self;
+    public function setContentType(string $mime, string $charset = 'UTF-8');
 
     //--------------------------------------------------------------------
     // Format Methods
@@ -220,20 +220,4 @@ interface ResponseInterface
      * @return ResponseInterface
      */
     public function setCache(array $options = []);
-
-    //--------------------------------------------------------------------
-    // Response Methods
-    //--------------------------------------------------------------------
-
-    /**
-     * Perform a redirect to a new URL, in two flavors: header or location.
-     *
-     * @param string $uri The URI to redirect to
-     * @param string $method
-     * @param int|null $code The type of redirection, defaults to 302
-     *
-     * @return $this
-     * @throws HttpException For invalid status code.
-     */
-    public function redirect(string $uri, string $method = 'auto', ?int $code = null): self;
 }

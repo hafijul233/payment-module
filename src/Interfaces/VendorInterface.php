@@ -22,15 +22,15 @@ interface VendorInterface
      * @param array $transactionInfo
      * @return mixed|void
      */
-    public function findOne(array $transactionInfo);
+    public function findOne(array $transactionInfo = []);
 
     /**
      * Create or transaction entry on vendor api platform
      *
-     * @param array $inputs
+     * @param array $transactionInfo
      * @return array
      */
-    public function createTransaction(array $inputs = []): array;
+    public function createTransaction(array $transactionInfo = []): array;
 
     /**
      * return a single transaction detail information based on vendor response
@@ -38,7 +38,7 @@ interface VendorInterface
      * @param array $transactionInfo
      * @return mixed|void
      */
-    public function transactionStatus(array $transactionInfo);
+    public function transactionStatus(array $transactionInfo = []);
 
     /**
      * send a transaction cancel request to vendor api
@@ -46,7 +46,7 @@ interface VendorInterface
      * @param array $transactionInfo
      * @return mixed|void
      */
-    public function cancelTransaction(array $transactionInfo);
+    public function cancelTransaction(array $transactionInfo = []);
 
     /**
      * send a transaction refund request to vendor api
@@ -54,5 +54,5 @@ interface VendorInterface
      * @param array $transactionInfo
      * @return mixed|void
      */
-    public function refundTransaction(array $transactionInfo);
+    public function refundTransaction(array $transactionInfo = []);
 }
