@@ -2,7 +2,6 @@
 
 namespace HishabKitab\Payment\Formatter;
 
-use HishabKitab\Payment\Config\Format as FormatterConfig;
 use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Interfaces\FormatInterface;
 
@@ -16,24 +15,24 @@ class Format
     /**
      * Configuration instance
      *
-     * @var FormatterConfig
+     * @var array
      */
     protected $config;
 
     /**
      * Constructor.
      */
-    public function __construct(FormatterConfig $config)
+    public function __construct()
     {
-        $this->config = $config;
+        $this->config = config('format');
     }
 
     /**
      * Returns the current configuration instance.
      *
-     * @return FormatterConfig
+     * @return array
      */
-    public function getConfig()
+    public function getConfig(): array
     {
         return $this->config;
     }
@@ -41,25 +40,24 @@ class Format
     /**
      * A Factory method to return the appropriate formatter for the given mime type.
      *
-     * @throws FormatException
      */
     public function getFormatter(string $mime): FormatInterface
     {
-        /*if (!array_key_exists($mime, $this->config->formatters)) {
+        if (! array_key_exists($mime, $this->config['formatters'])) {
             throw FormatException::forInvalidMime($mime);
-        }*/
+        }
 
-        $className = $this->config->formatters[$mime];
+        $className = $this->config['formatters'][$mime];
 
-        /*if (!class_exists($className)) {
+        if (! class_exists($className)) {
             throw FormatException::forInvalidFormatter($className);
-        }*/
+        }
 
         $class = new $className();
 
-        /*if (!$class instanceof FormatInterface) {
+        if (! $class instanceof FormatInterface) {
             throw FormatException::forInvalidFormatter($className);
-        }*/
+        }
 
         return $class;
     }

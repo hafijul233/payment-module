@@ -70,8 +70,10 @@ class Header
      */
     public function setValue($value = null)
     {
+        if (is_string($value)) {
+            $value = trim($value);
+        }
         $this->value = $value ?? '';
-
         return $this;
     }
 

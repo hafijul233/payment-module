@@ -2,7 +2,7 @@
 
 namespace HishabKitab\Payment\Formatter;
 
-use HishabKitab\Payment\Config\Format as FormatterConfig;
+use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Interfaces\FormatInterface;
 
 /**
@@ -19,18 +19,16 @@ class Json implements FormatInterface
      */
     public function format($data)
     {
-        $config = new FormatterConfig();
+        $config = config('format');
 
-        $options = $config->formatterOptions['application/json'] ?? JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+        $options = $config['options']['application/json'] ?? JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
         $options = $options | JSON_PARTIAL_OUTPUT_ON_ERROR;
 
-        //$options = ENVIRONMENT === 'production' ? $options : $options | JSON_PRETTY_PRINT;
+        $result = json_encode($data, $options);
 
-        $result = json_encode($data, $options, 512);
-
-        /*if (! in_array(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_RECURSION], true)) {
+        if (! in_array(json_last_error(), [JSON_ERROR_NONE, JSON_ERROR_RECURSION], true)) {
             throw FormatException::forInvalidJSON(json_last_error_msg());
-        }*/
+        }
 
         return $result;
     }

@@ -76,8 +76,16 @@ abstract class Request
      *
      * @return Header[]
      */
-    public function getHeader(): array
+    public function getHeader($name = null)
     {
+        if ($name != null) {
+            foreach ($this->headers as $header):
+                if ($header->getName() == $name) {
+                    return $header;
+                }
+            endforeach;
+        }
+
         return $this->headers;
     }
 
@@ -90,7 +98,7 @@ abstract class Request
      */
     public function prepareURL(string $url = ''): string
     {
-        if (! empty($url)) {
+        if (!empty($url)) {
             $this->setUrl($url);
         }
 

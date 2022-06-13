@@ -20,7 +20,7 @@ class Html implements FormatInterface
      */
     public function format($data)
     {
-        $config = new FormatterConfig();
+        $config = config('format');
 
         // SimpleHTML is installed but default
         // but best to check, and then provide a fallback.

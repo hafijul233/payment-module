@@ -2,7 +2,7 @@
 
 namespace HishabKitab\Payment\Formatter;
 
-use HishabKitab\Payment\Config\Format as FormatterConfig;
+use HishabKitab\Payment\Exceptions\FormatException;
 use HishabKitab\Payment\Interfaces\FormatInterface;
 use SimpleXMLElement;
 
@@ -21,15 +21,15 @@ class Xml implements FormatInterface
      */
     public function format($data)
     {
-        $config = new FormatterConfig();
+        $config = config('format');
 
         // SimpleXML is installed but default
         // but best to check, and then provide a fallback.
         if (! extension_loaded('simplexml')) {
             // never thrown in travis-ci
-            /*// @codeCoverageIgnoreStart
+            // @codeCoverageIgnoreStart
             throw FormatException::forMissingExtension();
-            // @codeCoverageIgnoreEnd*/
+            // @codeCoverageIgnoreEnd
         }
 
         $options = $config->formatterOptions['application/xml'] ?? 0;

@@ -5,9 +5,14 @@ namespace HishabKitab\Payment\Http;
 use DateTime;
 use DateTimeZone;
 use HishabKitab\Payment\Exceptions\HttpException;
+use HishabKitab\Payment\Formatter\Format;
+use InvalidArgumentException;
 
 class Response
 {
+    public const JSON = 'application/json';
+    public const XML = 'application/json';
+
     /**
      * HTTP status codes
      *
@@ -131,14 +136,6 @@ class Response
      */
     protected $statusCode = 200;
     /**
-     * If true, will not write output. Useful during testing.
-     *
-     * @var bool
-     *
-     * @internal Used for framework testing, should not be relied on otherwise
-     */
-    protected $pretend = false;
-    /**
      * Protocol version
      *
      * @var string
@@ -193,35 +190,6 @@ class Response
     }
 
     /**
-     * Appends data to the body of the current message.
-     *
-     * @param mixed $data
-     *
-     * @return $this
-     */
-    public function appendBody($data): self
-    {
-        $this->body .= (string)$data;
-
-        return $this;
-    }
-
-    /**
-     * Adds an additional header value to any headers that accept
-     * multiple values (i.e. are an array or implement ArrayAccess)
-     *
-     * @return $this
-     */
-    public function prependHeader(string $name, string $value): self
-    {
-        $origName = $this->getHeaderName($name);
-
-        $this->headers[$origName]->prependValue($value);
-
-        return $this;
-    }
-
-    /**
      * Converts the $body into JSON and sets the Content Type header.
      *
      * @param array|string $body
@@ -231,6 +199,20 @@ class Response
     public function setJSON($body, bool $unencoded = false)
     {
         $this->body = $this->formatBody($body, 'json' . ($unencoded ? '-unencoded' : ''));
+
+        return $this;
+    }
+
+    /**
+     * Converts $body into XML, and sets the correct Content-Type.
+     *
+     * @param array|string $body
+     *
+     * @return $this
+     */
+    public function setXML($body)
+    {
+        $this->body = $this->formatBody($body, 'xml');
 
         return $this;
     }
@@ -257,57 +239,26 @@ class Response
         $this->setContentType($mime);
 
         // Nothing much to do for a string...
-        if (! is_string($body) || $format === 'json-unencoded') {
-            $body = Services::format()->getFormatter($mime)->format($body);
+        if (!is_string($body) || $format === 'json-unencoded') {
+            $formatter = new Format();
+            $body = $formatter->getFormatter($mime)->format($body);
         }
 
         return $body;
     }
 
     /**
-     * Set the Link Header
-     *
-     * @see http://tools.ietf.org/html/rfc5988
-     *
-     * @param PagerInterface $pager
-     * @return self
-     *
-     * @todo Recommend moving to Pager
-     *
-     * public function setLink(PagerInterface $pager): self
-     * {
-     * $links = '';
-     *
-     * if ($previous = $pager->getPreviousPageURI()) {
-     * $links .= '<' . $pager->getPageURI($pager->getFirstPage()) . '>; rel="first",';
-     * $links .= '<' . $previous . '>; rel="prev"';
-     * }
-     *
-     * if (($next = $pager->getNextPageURI()) && $previous) {
-     * $links .= ',';
-     * }
-     *
-     * if ($next) {
-     * $links .= '<' . $next . '>; rel="next",';
-     * $links .= '<' . $pager->getPageURI($pager->getLastPage()) . '>; rel="last"';
-     * }
-     *
-     * $this->setHeader('Link', $links);
-     *
-     * return $this;
-     * }
-     */
-
-    /**
      * Sets the Content Type header for this response with the mime type
      * and, optionally, the charset.
      *
+     * @param string $mime
+     * @param string $charset
      * @return Response
      */
     public function setContentType(string $mime, string $charset = 'UTF-8'): self
     {
-        // add charset attribute if not already there and provided as parm
-        if ((strpos($mime, 'charset=') < 1) && ! empty($charset)) {
+        // add charset attribute if not already there and provided as param
+        if ((strpos($mime, 'charset=') < 1) && !empty($charset)) {
             $mime .= '; charset=' . $charset;
         }
 
@@ -328,56 +279,6 @@ class Response
         unset($this->headers[$origName], $this->headerMap[strtolower($name)]);
 
         return $this;
-    }
-
-    /**
-     * Returns the current body, converted to JSON is it isn't already.
-     *
-     * @return mixed|string
-     * @throws InvalidArgumentException If the body property is not array.
-     *
-     */
-    public function getJSON()
-    {
-        $body = $this->body;
-
-        if ($this->bodyFormat !== 'json') {
-            $body = Services::format()->getFormatter('application/json')->format($body);
-        }
-
-        return $body ?: null;
-    }
-
-    /**
-     * Converts $body into XML, and sets the correct Content-Type.
-     *
-     * @param array|string $body
-     *
-     * @return $this
-     */
-    public function setXML($body)
-    {
-        $this->body = $this->formatBody($body, 'xml');
-
-        return $this;
-    }
-
-    /**
-     * Retrieves the current body into XML and returns it.
-     *
-     * @return mixed|string
-     * @throws InvalidArgumentException If the body property is not array.
-     *
-     */
-    public function getXML()
-    {
-        $body = $this->body;
-
-        if ($this->bodyFormat !== 'xml') {
-            $body = Services::format()->getFormatter('application/xml')->format($body);
-        }
-
-        return $body;
     }
 
     /**
@@ -461,57 +362,6 @@ class Response
         return $this;
     }
 
-    /**
-     * Sends the output to the browser.
-     *
-     * @return Response
-     */
-    public function send()
-    {
-        // If we're enforcing a Content Security Policy,
-        // we need to give it a chance to build out it's headers.
-        if ($this->CSP->enabled()) {
-            $this->CSP->finalize($this);
-        } else {
-            $this->body = str_replace(['{csp-style-nonce}', '{csp-script-nonce}'], '', $this->body ?? '');
-        }
-
-        $this->sendHeaders();
-        $this->sendCookies();
-        $this->sendBody();
-
-        return $this;
-    }
-
-    /**
-     * Sends the headers of this HTTP response to the browser.
-     *
-     * @return Response
-     */
-    public function sendHeaders()
-    {
-        // Have the headers already been sent?
-        if ($this->pretend || headers_sent()) {
-            return $this;
-        }
-
-        // Per spec, MUST be sent with each request, if possible.
-        // http://www.w3.org/Protocols/rfc2616/rfc2616-sec13.html
-        if (! isset($this->headers['Date']) && PHP_SAPI !== 'cli-server') {
-            $this->setDate(DateTime::createFromFormat('U', (string)time()));
-        }
-
-        // HTTP Status
-        header(sprintf('HTTP/%s %s %s', $this->getProtocolVersion(), $this->getStatusCode(), $this->getReasonPhrase()), true, $this->getStatusCode());
-
-        // Send all of our headers
-        foreach (array_keys($this->getHeaders()) as $name) {
-            header($name . ': ' . $this->getHeaderLine($name), false, $this->getStatusCode());
-        }
-
-        return $this;
-    }
-
     //--------------------------------------------------------------------
     // Output Methods
     //--------------------------------------------------------------------
@@ -548,7 +398,7 @@ class Response
      */
     public function setProtocolVersion(string $version): self
     {
-        if (! is_numeric($version)) {
+        if (!is_numeric($version)) {
             $version = substr($version, strpos($version, '/') + 1);
         }
 
@@ -608,13 +458,13 @@ class Response
         }
 
         // Unknown and no message?
-        if (! array_key_exists($code, static::$statusCodes) && empty($reason)) {
+        if (!array_key_exists($code, static::$statusCodes) && empty($reason)) {
             throw HttpException::forUnkownStatusCode($code);
         }
 
         $this->statusCode = $code;
 
-        $this->reason = ! empty($reason) ? $reason : static::$statusCodes[$code];
+        $this->reason = !empty($reason) ? $reason : static::$statusCodes[$code];
 
         return $this;
     }
@@ -636,7 +486,7 @@ class Response
     public function getReasonPhrase()
     {
         if ($this->reason === '') {
-            return ! empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
+            return !empty($this->statusCode) ? static::$statusCodes[$this->statusCode] : '';
         }
 
         return $this->reason;
@@ -667,35 +517,27 @@ class Response
         // requesting it, then it's likely they want
         // it to be populated so do that...
         if (empty($this->headers)) {
-            $this->populateHeaders();
+            $contentType = $_SERVER['CONTENT_TYPE'] ?? getenv('CONTENT_TYPE');
+            if (!empty($contentType)) {
+                $this->setHeader('Content-Type', $contentType);
+            }
+            unset($contentType);
+
+            foreach (array_keys($_SERVER) as $key) {
+                if (sscanf($key, 'HTTP_%s', $header) === 1) {
+                    // take SOME_HEADER and turn it into Some-Header
+                    $header = str_replace('_', ' ', strtolower($header));
+                    $header = str_replace(' ', '-', ucwords($header));
+
+                    $this->setHeader($header, $_SERVER[$key]);
+
+                    // Add us to the header map so we can find them case-insensitively
+                    $this->headerMap[strtolower($header)] = $header;
+                }
+            }
         }
 
         return $this->headers;
-    }
-
-    /**
-     * Populates the $headers array with any headers the getServer knows about.
-     */
-    public function populateHeaders(): void
-    {
-        $contentType = $_SERVER['CONTENT_TYPE'] ?? getenv('CONTENT_TYPE');
-        if (! empty($contentType)) {
-            $this->setHeader('Content-Type', $contentType);
-        }
-        unset($contentType);
-
-        foreach (array_keys($_SERVER) as $key) {
-            if (sscanf($key, 'HTTP_%s', $header) === 1) {
-                // take SOME_HEADER and turn it into Some-Header
-                $header = str_replace('_', ' ', strtolower($header));
-                $header = str_replace(' ', '-', ucwords($header));
-
-                $this->setHeader($header, $_SERVER[$key]);
-
-                // Add us to the header map so we can find them case-insensitively
-                $this->headerMap[strtolower($header)] = $header;
-            }
-        }
     }
 
     /**
@@ -710,7 +552,7 @@ class Response
         $origName = $this->getHeaderName($name);
 
         if (isset($this->headers[$origName]) && is_array($this->headers[$origName]->getValue())) {
-            if (! is_array($value)) {
+            if (!is_array($value)) {
                 $value = [$value];
             }
 
@@ -766,318 +608,11 @@ class Response
     {
         $origName = $this->getHeaderName($name);
 
-        if (! array_key_exists($origName, $this->headers)) {
+        if (!array_key_exists($origName, $this->headers)) {
             return '';
         }
 
         return $this->headers[$origName]->getValueLine();
-    }
-
-    /**
-     * Actually sets the cookies.
-     */
-    protected function sendCookies()
-    {
-        if ($this->pretend) {
-            return;
-        }
-
-        $this->dispatchCookies();
-    }
-
-    private function dispatchCookies(): void
-    {
-        /** @var IncomingRequest $request */
-        $request = Services::request();
-
-        foreach ($this->cookieStore->display() as $cookie) {
-            if ($cookie->isSecure() && ! $request->isSecure()) {
-                throw SecurityException::forDisallowedAction();
-            }
-
-            $name = $cookie->getPrefixedName();
-            $value = $cookie->getValue();
-            $options = $cookie->getOptions();
-
-            if ($cookie->isRaw()) {
-                $this->doSetRawCookie($name, $value, $options);
-            } else {
-                $this->doSetCookie($name, $value, $options);
-            }
-        }
-
-        $this->cookieStore->clear();
-    }
-
-    /**
-     * Extracted call to `setrawcookie()` in order to run unit tests on it.
-     *
-     * @codeCoverageIgnore
-     */
-    private function doSetRawCookie(string $name, string $value, array $options): void
-    {
-        setrawcookie($name, $value, $options);
-    }
-
-    /**
-     * Extracted call to `setcookie()` in order to run unit tests on it.
-     *
-     * @codeCoverageIgnore
-     */
-    private function doSetCookie(string $name, string $value, array $options): void
-    {
-        setcookie($name, $value, $options);
-    }
-
-    /**
-     * Sends the Body of the message to the browser.
-     *
-     * @return Response
-     */
-    public function sendBody()
-    {
-        echo $this->body;
-
-        return $this;
-    }
-
-    /**
-     * Perform a redirect to a new URL, in two flavors: header or location.
-     *
-     * @param string $uri The URI to redirect to
-     * @param int $code The type of redirection, defaults to 302
-     *
-     * @return $this
-     * @throws HttpException For invalid status code.
-     *
-     */
-    public function redirect(string $uri, string $method = 'auto', ?int $code = null)
-    {
-        // Assume 302 status code response; override if needed
-        if (empty($code)) {
-            $code = 302;
-        }
-
-        // IIS environment likely? Use 'refresh' for better compatibility
-        if ($method === 'auto' && isset($_SERVER['SERVER_SOFTWARE']) && strpos($_SERVER['SERVER_SOFTWARE'], 'Microsoft-IIS') !== false) {
-            $method = 'refresh';
-        }
-
-        // override status code for HTTP/1.1 & higher
-        // reference: http://en.wikipedia.org/wiki/Post/Redirect/Get
-        if (isset($_SERVER['SERVER_PROTOCOL'], $_SERVER['REQUEST_METHOD']) && $this->getProtocolVersion() >= 1.1 && $method !== 'refresh') {
-            $code = ($_SERVER['REQUEST_METHOD'] !== 'GET') ? 303 : ($code === 302 ? 307 : $code);
-        }
-
-        switch ($method) {
-            case 'refresh':
-                $this->setHeader('Refresh', '0;url=' . $uri);
-
-                break;
-
-            default:
-                $this->setHeader('Location', $uri);
-
-                break;
-        }
-
-        $this->setStatusCode($code);
-
-        return $this;
-    }
-
-    /**
-     * Returns the `CookieStore` instance.
-     *
-     * @return CookieStore
-     */
-    public function getCookieStore()
-    {
-        return $this->cookieStore;
-    }
-
-    /**
-     * Checks to see if the Response has a specified cookie or not.
-     */
-    public function hasCookie(string $name, ?string $value = null, string $prefix = ''): bool
-    {
-        $prefix = $prefix ?: Cookie::setDefaults()['prefix']; // to retain BC
-
-        return $this->cookieStore->has($name, $prefix, $value);
-    }
-
-    /**
-     * Returns the cookie
-     *
-     * @return Cookie|Cookie[]|null
-     */
-    public function getCookie(?string $name = null, string $prefix = '')
-    {
-        if ((string)$name === '') {
-            return $this->cookieStore->display();
-        }
-
-        try {
-            $prefix = $prefix ?: Cookie::setDefaults()['prefix']; // to retain BC
-
-            return $this->cookieStore->get($name, $prefix);
-        } catch (CookieException $e) {
-            log_message('error', $e->getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * Sets a cookie to be deleted when the response is sent.
-     *
-     * @return $this
-     */
-    public function deleteCookie(string $name = '', string $domain = '', string $path = '/', string $prefix = '')
-    {
-        if ($name === '') {
-            return $this;
-        }
-
-        $prefix = $prefix ?: Cookie::setDefaults()['prefix']; // to retain BC
-
-        $prefixed = $prefix . $name;
-        $store = $this->cookieStore;
-        $found = false;
-
-        foreach ($store as $cookie) {
-            if ($cookie->getPrefixedName() === $prefixed) {
-                if ($domain !== $cookie->getDomain()) {
-                    continue;
-                }
-
-                if ($path !== $cookie->getPath()) {
-                    continue;
-                }
-
-                $cookie = $cookie->withValue('')->withExpired();
-                $found = true;
-
-                $this->cookieStore = $store->put($cookie);
-
-                break;
-            }
-        }
-
-        if (! $found) {
-            $this->setCookie($name, '', '', $domain, $path, $prefix);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Set a cookie
-     *
-     * Accepts an arbitrary number of binds (up to 7) or an associative
-     * array in the first parameter containing all the values.
-     *
-     * @param array|Cookie|string $name Cookie name / array containing binds / Cookie object
-     * @param string $value Cookie value
-     * @param string $expire Cookie expiration time in seconds
-     * @param string $domain Cookie domain (e.g.: '.yourdomain.com')
-     * @param string $path Cookie path (default: '/')
-     * @param string $prefix Cookie name prefix
-     * @param bool $secure Whether to only transfer cookies via SSL
-     * @param bool $httponly Whether only make the cookie accessible via HTTP (no javascript)
-     * @param string|null $samesite
-     *
-     * @return $this
-     */
-    public function setCookie(
-        $name,
-        $value = '',
-        $expire = '',
-        $domain = '',
-        $path = '/',
-        $prefix = '',
-        $secure = false,
-        $httponly = false,
-        $samesite = null
-    ) {
-        if ($name instanceof Cookie) {
-            $this->cookieStore = $this->cookieStore->put($name);
-
-            return $this;
-        }
-
-        if (is_array($name)) {
-            // always leave 'name' in last place, as the loop will break otherwise, due to $$item
-            foreach (['samesite', 'value', 'expire', 'domain', 'path', 'prefix', 'secure', 'httponly', 'name'] as $item) {
-                if (isset($name[$item])) {
-                    ${$item} = $name[$item];
-                }
-            }
-        }
-
-        if (is_numeric($expire)) {
-            $expire = $expire > 0 ? time() + $expire : 0;
-        }
-
-        $cookie = new Cookie($name, $value, [
-            'expires' => $expire ?: 0,
-            'domain' => $domain,
-            'path' => $path,
-            'prefix' => $prefix,
-            'secure' => $secure,
-            'httponly' => $httponly,
-            'samesite' => $samesite ?? '',
-        ]);
-
-        $this->cookieStore = $this->cookieStore->put($cookie);
-
-        return $this;
-    }
-
-    /**
-     * Returns all cookies currently set.
-     *
-     * @return Cookie[]
-     */
-    public function getCookies()
-    {
-        return $this->cookieStore->display();
-    }
-
-    /**
-     * Force a download.
-     *
-     * Generates the headers that force a download to happen. And
-     * sends the file to the browser.
-     *
-     * @param string $filename The path to the file to send
-     * @param string|null $data The data to be downloaded
-     * @param bool $setMime Whether to try and send the actual MIME type
-     *
-     * @return DownloadResponse|null
-     */
-    public function download(string $filename = '', $data = '', bool $setMime = false)
-    {
-        if ($filename === '' || $data === '') {
-            return null;
-        }
-
-        $filepath = '';
-        if ($data === null) {
-            $filepath = $filename;
-            $filename = explode('/', str_replace(DIRECTORY_SEPARATOR, '/', $filename));
-            $filename = end($filename);
-        }
-
-        $response = new DownloadResponse($filename, $setMime);
-
-        if ($filepath !== '') {
-            $response->setFilePath($filepath);
-        } elseif ($data !== null) {
-            $response->setBinary($data);
-        }
-
-        return $response;
     }
 
     /**
@@ -1105,21 +640,6 @@ class Response
     }
 
     /**
-     * Returns a single header object. If multiple headers with the same
-     * name exist, then will return an array of header objects.
-     *
-     * @return array|Header|null
-     *
-     * @deprecated Use Message::header() to make room for PSR-7
-     *
-     * @codeCoverageIgnore
-     */
-    public function getHeader(string $name)
-    {
-        return $this->header($name);
-    }
-
-    /**
      * Returns a single Header object. If multiple headers with the same
      * name exist, then will return an array of header objects.
      *
@@ -1127,7 +647,7 @@ class Response
      *
      * @return Header|null
      */
-    public function header(string $name): ?Header
+    public function getHeader(string $name): ?Header
     {
         $origName = $this->getHeaderName($name);
 
@@ -1142,20 +662,6 @@ class Response
         $origName = $this->getHeaderName($name);
 
         return isset($this->headers[$origName]);
-    }
-
-    /**
-     * Turns "pretend" mode on or off to aid in testing.
-     * Note that this is not a part of the interface so
-     * should not be relied on outside of internal testing.
-     *
-     * @return $this
-     */
-    public function pretend(bool $pretend = true)
-    {
-        $this->pretend = $pretend;
-
-        return $this;
     }
 
     /**
